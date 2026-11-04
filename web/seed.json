@@ -1,0 +1,331 @@
+{
+ "biz/biz-jobello": {
+  "activite": "",
+  "budget": "",
+  "color": "p7",
+  "createdAt": "2026-11-04T20:30:00Z",
+  "debut": "",
+  "forme": "",
+  "name": "Jobello",
+  "notes": "À compléter : ce que fait le projet, où il en est, liens.",
+  "objectif": "",
+  "order": 5,
+  "phase": "idee",
+  "statut": "actif",
+  "taux": "",
+  "updatedAt": "2026-11-04T20:30:00Z"
+ },
+ "biz/biz-dsg": {
+  "activite": "Secrétariat téléphonique IA pour artisans (garages, plombiers), Vincennes",
+  "budget": "",
+  "color": "p1",
+  "createdAt": "2026-11-04T20:30:00Z",
+  "debut": "2026-12-01",
+  "forme": "Micro-entreprise (à immatriculer)",
+  "name": "DSG Conseil",
+  "notes": "Offres : Essentiel 290 € + 89 €/mois, Pro 490 € + 149 €/mois, Complète 990 € + 249 €/mois. Démarrage visé le 1er décembre 2026.",
+  "objectif": "",
+  "order": 0,
+  "phase": "creation",
+  "statut": "actif",
+  "taux": "",
+  "updatedAt": "2026-11-04T20:20:00Z"
+ },
+ "biz/biz-repz": {
+  "activite": "",
+  "budget": "",
+  "color": "p2",
+  "createdAt": "2026-11-04T20:30:00Z",
+  "debut": "",
+  "forme": "",
+  "name": "Repz",
+  "notes": "À compléter : ce que fait le projet, où il en est, liens.",
+  "objectif": "",
+  "order": 2,
+  "phase": "idee",
+  "statut": "actif",
+  "taux": "",
+  "updatedAt": "2026-11-04T20:30:00Z"
+ },
+ "biz/biz-u-livres": {
+  "activite": "Beaux livres haut de gamme sur les objets de légende et leur époque (montres, voitures, avions…), autour de 120 €",
+  "budget": "",
+  "color": "p3",
+  "createdAt": "2026-11-04T20:33:00Z",
+  "debut": "",
+  "forme": "",
+  "name": "Livres de luxe",
+  "notes": "Risque principal : les droits (photos d'archives, image des stars, marques).",
+  "objectif": "Construire une collection reconnaissable, titre après titre",
+  "order": 1,
+  "parent": "",
+  "phase": "creation",
+  "statut": "actif",
+  "taux": "",
+  "updatedAt": "2026-11-04T20:33:00Z"
+ },
+ "biz/biz-goodfood": {
+  "activite": "App web de bonnes adresses à Paris, classées par arrondissement et par type (Précieuses, Carte, Mes envies)",
+  "budget": "",
+  "color": "p5",
+  "createdAt": "2026-11-04T20:30:00Z",
+  "debut": "",
+  "forme": "",
+  "name": "The Good Food List",
+  "notes": "App web installable sur mobile, en ligne sur GitHub Pages. À préciser : objectif (perso, public, monétisation ?) et prochaines évolutions, à noter dans l'onglet Améliorations apps.",
+  "objectif": "",
+  "order": 3,
+  "parent": "biz-u-cuisine",
+  "phase": "creation",
+  "statut": "actif",
+  "taux": "",
+  "updatedAt": "2026-11-04T20:31:00Z"
+ },
+ "biz/biz-livre-autos": {
+  "activite": "Beau livre sur une voiture mythique : son histoire, photos d'époque, stars qui l'ont conduite",
+  "budget": "",
+  "color": "p6",
+  "createdAt": "2026-11-04T20:33:00Z",
+  "debut": "",
+  "forme": "",
+  "name": "Livre voitures de légende",
+  "notes": "Pistes : livre sur mesure pour propriétaires de voitures de collection, ou collection « Icônes » (un modèle par livre). Voir la veille dans les Documents.",
+  "objectif": "",
+  "order": 7,
+  "parent": "biz-u-livres",
+  "phase": "idee",
+  "statut": "actif",
+  "taux": "",
+  "updatedAt": "2026-11-04T20:33:00Z"
+ },
+ "biz/biz-u-cuisine": {
+  "activite": "Apps web autour de la cuisine et des bonnes adresses",
+  "budget": "",
+  "color": "p4",
+  "createdAt": "2026-11-04T20:33:00Z",
+  "debut": "",
+  "forme": "",
+  "name": "Apps de cuisine",
+  "notes": "",
+  "objectif": "",
+  "order": 2,
+  "parent": "",
+  "phase": "creation",
+  "statut": "actif",
+  "taux": "",
+  "updatedAt": "2026-11-04T20:33:00Z"
+ },
+ "biz/biz-lip": {
+  "activite": "Beau livre haut de gamme sur l'histoire des montres Lip",
+  "budget": "",
+  "color": "p3",
+  "createdAt": "2026-11-04T20:30:00Z",
+  "debut": "",
+  "forme": "",
+  "name": "Livre Lip (montres)",
+  "notes": "Manuscrit écrit et maquette Canva de 77 pages remplie avec les textes. Les images sont générées par IA ou viennent de banques d'images : à remplacer par de vraies archives sous licence. Faits à vérifier : reprise par Fred Lip (1931 ou 1939), montre offerte à Eisenhower ou de Gaulle (1952 ou 1958), repères du guide collectionneur. Piste plus large : collection « objets de légende et leur époque » ; le vrai risque, ce sont les droits (photos, image des stars, marques).",
+  "objectif": "Sortir un premier titre haut de gamme vendu autour de 120 €",
+  "order": 4,
+  "parent": "biz-u-livres",
+  "phase": "creation",
+  "statut": "actif",
+  "taux": "",
+  "updatedAt": "2026-11-04T20:35:00Z"
+ },
+ "biz/biz-mijonote": {
+  "activite": "App web de cuisine : recettes, sauces et contenu du frigo",
+  "budget": "",
+  "color": "p4",
+  "createdAt": "2026-11-04T20:30:00Z",
+  "debut": "",
+  "forme": "",
+  "name": "Mijonote",
+  "notes": "App web mobile en ligne sur GitHub Pages. À préciser : objectif et prochaines évolutions (onglet Améliorations apps).",
+  "objectif": "",
+  "order": 1,
+  "parent": "biz-u-cuisine",
+  "phase": "creation",
+  "statut": "actif",
+  "taux": "",
+  "updatedAt": "2026-11-04T20:30:00Z"
+ },
+ "jalons/jalons-dsg6": {
+  "biz": "biz-dsg",
+  "date": "",
+  "note": "",
+  "phase": "lancement",
+  "statut": "a_faire",
+  "titre": "Signer le premier client"
+ },
+ "jalons/jalons-lip2": {
+  "biz": "biz-lip",
+  "date": "",
+  "note": "Reprise par Fred Lip (1931 ou 1939), date du cadeau (1952 ou 1958), repères du guide collectionneur.",
+  "phase": "creation",
+  "statut": "a_faire",
+  "titre": "Vérifier les faits signalés dans le manuscrit"
+ },
+ "jalons/jalons-lip5": {
+  "biz": "biz-lip",
+  "date": "",
+  "note": "Seuil de rentabilité estimé autour de 1 000 à 2 000 exemplaires.",
+  "phase": "lancement",
+  "statut": "a_faire",
+  "titre": "Demander des devis d'impression haut de gamme"
+ },
+ "jalons/jalons-dsg4": {
+  "biz": "biz-dsg",
+  "date": "",
+  "note": "",
+  "phase": "lancement",
+  "statut": "a_faire",
+  "titre": "Finaliser l'agent téléphonique de démonstration"
+ },
+ "jalons/jalons-dsg2": {
+  "biz": "biz-dsg",
+  "date": "2026-11-30",
+  "note": "Identité Numérique La Poste déjà disponible.",
+  "phase": "creation",
+  "statut": "a_faire",
+  "titre": "Immatriculer la micro-entreprise sur le guichet unique (INPI)"
+ },
+ "jalons/jalons-dsg5": {
+  "biz": "biz-dsg",
+  "date": "",
+  "note": "",
+  "phase": "lancement",
+  "statut": "a_faire",
+  "titre": "Lancer la prospection terrain à Vincennes"
+ },
+ "jalons/jalons-dsg3": {
+  "biz": "biz-dsg",
+  "date": "",
+  "note": "",
+  "phase": "creation",
+  "statut": "a_faire",
+  "titre": "Ouvrir un compte bancaire dédié"
+ },
+ "jalons/jalons-lip4": {
+  "biz": "biz-lip",
+  "date": "",
+  "note": "De Gaulle, la marche de 1973, l'usine, portraits de Lipmann et Fred Lip.",
+  "phase": "creation",
+  "statut": "a_faire",
+  "titre": "Obtenir les licences des photos d'archives (agences)"
+ },
+ "jalons/jalons-lip1": {
+  "biz": "biz-lip",
+  "date": "",
+  "note": "",
+  "phase": "creation",
+  "statut": "fait",
+  "titre": "Écrire le manuscrit et remplir la maquette"
+ },
+ "jalons/jalons-lip3": {
+  "biz": "biz-lip",
+  "date": "",
+  "note": "",
+  "phase": "creation",
+  "statut": "a_faire",
+  "titre": "Contacter Lip pour l'accord de marque et les archives"
+ },
+ "jalons/jalons-dsg1": {
+  "biz": "biz-dsg",
+  "date": "",
+  "note": "",
+  "phase": "creation",
+  "statut": "fait",
+  "titre": "Choisir le nom commercial : DSG Conseil"
+ },
+ "docs/docs-gf1": {
+  "biz": "biz-goodfood",
+  "note": "",
+  "titre": "The Good Food List (site en ligne)",
+  "type": "Produit / technique",
+  "url": "https://tulliodisegni-art.github.io/The-good-food-list/"
+ },
+ "docs/docs-mij1": {
+  "biz": "biz-mijonote",
+  "note": "",
+  "titre": "Mijonote (site en ligne)",
+  "type": "Produit / technique",
+  "url": "https://tulliodisegni-art.github.io/Mijonote/"
+ },
+ "docs/docs-lip2": {
+  "biz": "biz-lip",
+  "note": "Images IA à remplacer par des archives sous licence.",
+  "titre": "Maquette Canva (77 pages, avec les textes)",
+  "type": "Produit / technique",
+  "url": "https://www.canva.com/d/IxsqL9U4yq8UIo6"
+ },
+ "docs/docs-3": {
+  "biz": "biz-dsg",
+  "note": "",
+  "titre": "Plan de lancement",
+  "type": "Business plan",
+  "url": "https://claude.ai/artifact/EvR8pmkNPejahfToxvTUgo"
+ },
+ "docs/docs-2": {
+  "biz": "biz-dsg",
+  "note": "",
+  "titre": "CGV, abonnement et RGPD",
+  "type": "Juridique",
+  "url": "https://claude.ai/code/artifact/79c92bfd-466b-42e3-abeb-069010d9dca6"
+ },
+ "docs/docs-7": {
+  "biz": "biz-dsg",
+  "note": "Concurrent le plus proche : Garagent (497 €/mois).",
+  "titre": "Veille concurrents",
+  "type": "Marketing",
+  "url": "https://claude.ai/artifact/8bPxFhtw3u4VGpV3auTreB"
+ },
+ "docs/docs-lip1": {
+  "biz": "biz-lip",
+  "note": "",
+  "titre": "Aperçu du livre Lip (double page par double page)",
+  "type": "Produit / technique",
+  "url": "https://claude.ai/artifact/TiZDKz49ioUQuzmtVrYrAY"
+ },
+ "docs/docs-8": {
+  "biz": "biz-dsg",
+  "note": "",
+  "titre": "Mails de prospection",
+  "type": "Marketing",
+  "url": "https://claude.ai/artifact/STCsd2P28zLyDDca7QHN51"
+ },
+ "docs/docs-1": {
+  "biz": "biz-dsg",
+  "note": "",
+  "titre": "Micro-entreprise : nom, business plan et démarches",
+  "type": "Business plan",
+  "url": "https://claude.ai/code/artifact/f883f6ef-addc-4c94-bd47-0979468ce4ed"
+ },
+ "docs/docs-lip3": {
+  "biz": "biz-livre-autos",
+  "note": "Marché, concurrents (Assouline, Taschen…), coûts, autres thèmes possibles.",
+  "titre": "Veille : livres de luxe sur les voitures de légende",
+  "type": "Business plan",
+  "url": "https://claude.ai/artifact/Kz54hECF8cHWZ3rizZj6DS"
+ },
+ "docs/docs-6": {
+  "biz": "biz-dsg",
+  "note": "",
+  "titre": "Programme démo 14 jours",
+  "type": "Marketing",
+  "url": "https://claude.ai/artifact/AnUB6ysJKvQ4tMnuyX65GL"
+ },
+ "docs/docs-4": {
+  "biz": "biz-dsg",
+  "note": "",
+  "titre": "Agent téléphonique complet",
+  "type": "Produit / technique",
+  "url": "https://claude.ai/artifact/TSuFGAaaZaqLDsHZY1DEs3"
+ },
+ "docs/docs-5": {
+  "biz": "biz-dsg",
+  "note": "",
+  "titre": "Programme formation + RDV artisan",
+  "type": "Produit / technique",
+  "url": "https://claude.ai/artifact/NzaW12tUcWAukVkMBnBm8V"
+ }
+}
