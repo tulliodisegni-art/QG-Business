@@ -175,6 +175,8 @@ const caps={db,downloads,sample};
 window.claude=Object.freeze({use:name=>window.QG.ready.then(()=>caps[name]||null)});
 
 /* ---------- appli installable ---------- */
-if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+if("serviceWorker" in navigator){let had=!!navigator.serviceWorker.controller,done=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=true;location.reload()}had=true});
+  navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{const up=()=>r.update().catch(()=>{});document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")up()})}).catch(()=>{})}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
 })();
