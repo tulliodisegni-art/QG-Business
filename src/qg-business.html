@@ -266,17 +266,87 @@ a.lk:hover{text-decoration:underline}
   .head .actions{width:100%}
 }
 @media (max-width:380px){.tabbar a{font-size:10px}.tabbar a svg{width:20px;height:20px}}
+
+/* Rail vertical des sections */
+.rail{display:flex;flex-direction:column;gap:3px;position:fixed;z-index:30;left:16px;top:16px;bottom:16px;width:236px;padding:16px 12px;background:var(--bar);border-radius:28px;box-shadow:0 14px 40px rgba(120,80,40,.14),0 0 0 1px rgba(0,0,0,.035);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);overflow-y:auto;scrollbar-width:none}
+.rail-h{display:flex;align-items:center;gap:11px;padding:4px 6px 16px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+.rail-h .ti{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--pc);color:#fff;font:700 15px var(--f-display)}
+.rail-h .ti svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.rail-h div{min-width:0;display:flex;flex-direction:column}
+.rail-h small{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--pc)}
+.rail-h b{font:700 16px/1.2 var(--f-display);letter-spacing:-.01em;overflow-wrap:anywhere}
+.rail a{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:16px;color:var(--muted);text-decoration:none;font-weight:600;font-size:14.5px}
+.rail a svg{width:20px;height:20px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rail a:hover{background:var(--surface-2);color:var(--fg)}
+.rail a[aria-current="page"]{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 6px 16px rgba(242,103,46,.28)}
+.rail-f{margin-top:auto;padding-top:12px}
+.rail .back{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;padding:11px 14px;border-radius:16px;background:var(--surface-2);color:var(--fg);font-weight:600;font-size:13.5px;text-align:center}
+.rail .back:hover{background:var(--accent-soft);color:var(--accent)}
+.rail .back:focus-visible{outline:2px solid var(--accent)}
+@media (min-width:900px){
+  .shell{max-width:none;margin:0;padding-left:calc(236px + 48px);padding-right:32px}
+  .shell>*{max-width:1120px;margin-inline:auto}
+  .tabbar{left:calc(50% + 134px)}
+  .top{margin-bottom:22px}
+}
+@media (max-width:899.98px){
+  .rail{position:sticky;top:0;left:auto;bottom:auto;width:auto;flex-direction:row;gap:6px;padding:8px max(16px,env(safe-area-inset-left,0px));margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px))) 16px;border-radius:0;background:var(--bg);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;overflow-x:auto;overflow-y:hidden}
+  .rail-h,.rail-f{display:none}
+  .rail a{flex:none;padding:8px 14px;font-size:14px;gap:7px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow)}
+  .rail a svg{width:17px;height:17px}
+}
+/* Pastilles projets */
+.projchips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;margin-bottom:18px}
+.projchips[hidden]{display:none}
+.projchips button{all:unset;cursor:pointer;flex:none;display:inline-flex;align-items:center;gap:8px;padding:8px 15px;border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-weight:600;font-size:13.5px;color:var(--muted)}
+.projchips button:hover{color:var(--fg)}
+.projchips button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+.projchips button:focus-visible{outline:2px solid var(--accent)}
+/* Accueil */
+.hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px 32px;padding:26px 28px;margin-bottom:18px;border-radius:28px;background:linear-gradient(120deg,var(--surface) 0%,var(--surface) 45%,var(--peach) 100%);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero[style]::before{content:"";position:absolute;inset:0 auto 0 0;width:6px;background:var(--pc)}
+.hero-t{min-width:0;flex:1 1 340px}
+.hero h1{font-size:clamp(28px,4.4vw,40px)}
+.hero .eyebrow{text-transform:capitalize;letter-spacing:.02em;font-size:13px}
+.hero[style] .eyebrow{color:var(--pc);text-transform:uppercase;letter-spacing:.1em;font-size:12px}
+.goal{margin:12px 0 0;display:inline-flex;gap:8px;align-items:baseline;flex-wrap:wrap;background:var(--surface-2);border-radius:14px;padding:8px 12px;font-size:14px;max-width:70ch}
+.goal b{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.hero-n{display:flex;gap:10px;flex-wrap:wrap}
+.hero-n div{display:flex;flex-direction:column;align-items:center;min-width:92px;padding:12px 14px;border-radius:18px;background:var(--surface);box-shadow:0 1px 0 var(--line)}
+.hero-n b{font:700 28px/1 var(--f-display);font-variant-numeric:tabular-nums;color:var(--accent)}
+.hero-n span{font-size:12.5px;color:var(--muted);font-weight:600;margin-top:5px}
+.cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start;margin-bottom:26px}
+.cols2>*{min-width:0}
+.sect{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+.sect h2{font-size:20px}
+@media (max-width:900px){.cols2{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:560px){.hero{padding:20px 18px}.hero-n div{min-width:0;flex:1}}
+/* Barre du bas : un onglet par univers */
+.tabbar{display:flex;width:auto;max-width:calc(100% - 24px);overflow-x:auto;scrollbar-width:none}
+.tabbar>*{flex:0 0 auto;min-width:74px}
+.tabbar a,.tabbar .tadd{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 8px 6px;border-radius:18px;color:var(--bar-muted);text-decoration:none;font-size:11px;font-weight:600}
+.tabbar .tadd{all:unset;box-sizing:border-box;cursor:pointer;position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 8px 6px;border-radius:18px;color:var(--bar-muted);font-size:11px;font-weight:600;min-width:74px}
+.tabbar .tadd:hover{color:var(--bar-fg)}
+.tabbar .tadd:focus-visible{outline:2px solid var(--accent)}
+.tabbar .ti{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--pc,var(--surface-2));color:#fff;font:700 12px var(--f-display);letter-spacing:.02em}
+.tabbar .ti.home{background:transparent;color:inherit}
+.tabbar .ti.home svg{width:23px;height:23px}
+.tabbar .tadd .ti{background:var(--surface-2);color:var(--accent);font-size:18px}
+.tabbar .tl{max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabbar a[aria-current="page"] .ti{box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.tabbar a[aria-current="page"] .ti.home{box-shadow:none}
 </style>
 
 <div class="shell">
   <header class="top">
     <div class="brand"><b>QG Business</b><small id="today"></small></div>
     <div class="top-r">
-      <button class="pill" id="bizpill" data-act="sheet" aria-haspopup="dialog"></button>
       <button class="round" data-act="theme" id="themebtn"></button>
+      <button class="round" data-act="sheet" id="menubtn" aria-haspopup="dialog" aria-label="Menu : nouvel univers, sauvegarde" title="Menu"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></button>
     </div>
   </header>
-  <nav class="subtabs" id="subtabs" aria-label="Sections"></nav>
+  <nav class="rail" id="subtabs" aria-label="Sections"></nav>
+  <div class="projchips" id="projchips" hidden></div>
   <main id="main"></main>
 </div>
 <nav class="tabbar" id="tabbar" aria-label="Onglets principaux"></nav>
@@ -358,8 +428,8 @@ const SCHEMA={
 };
 const COLS=Object.keys(SCHEMA);
 const S={ready:{}};COLS.forEach(c=>S[c]={});
-const UI={amType:"",amShowDone:false,view:"tableau",biz:"",year:new Date().getFullYear(),q:"",opType:"",msShowDone:false,ctType:"",ctStep:"",achShowDone:false};
-try{const b=localStorage.getItem("qg-biz");if(b)UI.biz=b}catch(e){}
+const UI={proj:"",amType:"",amShowDone:false,view:"tableau",biz:"",year:new Date().getFullYear(),q:"",opType:"",msShowDone:false,ctType:"",ctStep:"",achShowDone:false};
+
 let db=null,offline=false,sample=null;
 
 /* ================= Outils ================= */
@@ -387,7 +457,9 @@ const kids=id=>bizList().filter(b=>b.parent===id&&b.id!==id);
 const tops=()=>bizList().filter(isTop);
 const ordered=()=>tops().flatMap(t=>[t,...kids(t.id)]);
 const famIds=id=>[id,...kids(id).map(k=>k.id)];
-const inBiz=r=>!UI.biz||famIds(UI.biz).includes(r.biz);
+const scope=()=>UI.proj||UI.biz;
+const inBiz=r=>!scope()||famIds(scope()).includes(r.biz);
+const hideTag=()=>!!UI.proj||(!!UI.biz&&!kids(UI.biz).length);
 const rows=col=>Object.values(S[col]).filter(inBiz);
 const bTag=id=>{const b=S.biz[id];return b?`<span class="bname"><span class="dot" style="--pc:${bcol(b)}"></span>${esc(b.name)}</span>`:`<span class="bname">—</span>`};
 function dueChip(d,done){if(!d)return "";if(done)return `<span class="chip">${fmt(d)}</span>`;const x=diff(d,TODAY);
@@ -412,7 +484,7 @@ function cotis(list){let c=0;list.filter(x=>x.type==="recette"&&x.categorie!=="A
 /* ================= Vues ================= */
 function head(eyebrow,title,sub,actions){const b=S.biz[UI.biz];
   return `${offline?`<div class="banner">La base de données n'est pas disponible dans cette vue : vous pouvez tester le logiciel, mais rien ne sera enregistré.</div>`:""}
-  <div class="head"><div><div class="eyebrow">${eyebrow}${b?`<span class="filt"><span class="dot" style="--pc:${bcol(b)}"></span>${esc(b.name)}<button data-act="biz" data-id="" aria-label="Afficher tous les projets">✕</button></span>`:""}</div><h1>${title}</h1>${sub?`<p class="sub">${sub}</p>`:""}</div><div class="actions">${actions||""}</div></div>`}
+  <div class="head"><div><div class="eyebrow">${eyebrow}</div><h1>${title}</h1>${sub?`<p class="sub">${sub}</p>`:""}</div><div class="actions">${actions||""}</div></div>`}
 const addBtn=(col,label,primary=true)=>`<button class="btn ${primary?"primary":""}" data-act="new" data-col="${col}">+ ${label}</button>`;
 function emptyBiz(){return `<div class="panel empty-big"><h2>Commencez par créer un business</h2><p>Chaque business a sa feuille de route, ses finances, ses achats, ses clients et ses actions marketing.</p><p>${addBtn("biz","Créer un business")}</p></div>`}
 
@@ -425,28 +497,38 @@ function alerts(){const out=[];
   rows("ameliorations").filter(x=>x.type==="Bug"&&x.priorite==="haute"&&x.statut!=="livre").forEach(x=>out.push({d:x.date||"",late:!!x.date&&x.date<TODAY,col:"ameliorations",id:x.id,t:x.titre,k:"Bug prioritaire",biz:x.biz,bad:true}));
   rows("marketing").filter(m=>m.statut==="prevu"&&m.date&&m.date<=addDays(TODAY,7)).forEach(m=>out.push({d:m.date,late:m.date<TODAY,col:"marketing",id:m.id,t:m.titre,k:"Marketing",biz:m.biz}));
   return out.sort((a,b)=>(b.late-a.late)||((a.d||"9")<(b.d||"9")?-1:1))}
-function alertRow(a){return `<div class="item"><div><button class="t" data-act="edit" data-col="${a.col}" data-id="${a.id}">${esc(a.t)}</button><div class="meta"><span class="chip ${a.bad?"bad":a.col==="achats"?"info":"acc"}">${esc(a.k)}</span>${UI.biz?"":bTag(a.biz)}${a.m?`<span class="money">${eur(a.m)}</span>`:""}</div></div><div>${a.d?dueChip(a.d,false):""}</div></div>`}
+function alertRow(a){return `<div class="item"><div><button class="t" data-act="edit" data-col="${a.col}" data-id="${a.id}">${esc(a.t)}</button><div class="meta"><span class="chip ${a.bad?"bad":a.col==="achats"?"info":"acc"}">${esc(a.k)}</span>${hideTag()?"":bTag(a.biz)}${a.m?`<span class="money">${eur(a.m)}</span>`:""}</div></div><div>${a.d?dueChip(a.d,false):""}</div></div>`}
 
+function nextSteps(){const L=rows("jalons").filter(m=>m.statut!=="fait").sort((a,b)=>(a.date||"9")<(b.date||"9")?-1:(a.date||"9")>(b.date||"9")?1:0).slice(0,7);
+  return L.length?L.map(m=>`<div class="item"><div><button class="t" data-act="edit" data-col="jalons" data-id="${m.id}">${esc(m.titre)}</button><div class="meta">${hideTag()?"":bTag(m.biz)}${m.statut==="en_cours"?`<span class="chip info">En cours</span>`:m.statut==="bloque"?`<span class="chip bad">Bloqué</span>`:""}</div></div><div>${m.date?dueChip(m.date,false):`<span class="chip">Sans date</span>`}</div></div>`).join(""):`<p class="empty">Aucune étape à venir. Ajoutez les grandes étapes dans la feuille de route.</p>`}
 function vTableau(){
-  if(loading())return head("Tableau de bord","Chargement…");
-  if(!bizList().length)return head("Tableau de bord","Vos business, au même endroit")+emptyBiz();
+  if(loading())return `<div class="hero"><h1>Chargement…</h1></div>`;
+  if(!bizList().length)return `<div class="hero"><div><div class="eyebrow">${new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}</div><h1>Bonjour Tullio</h1><p class="sub">Tous vos projets, au même endroit.</p></div></div>`+emptyBiz();
   const y=new Date().getFullYear();const yo=yearOps(y);const T=totals(yo);const c=cotis(yo);
   const al=alerts();const ms=rows("jalons");const msDone=ms.filter(m=>m.statut==="fait").length;
-  const ct=rows("contacts").filter(x=>x.type==="prospect"||x.type==="client");const pipeVal=ct.filter(x=>!["signe","perdu"].includes(x.etape)).reduce((s,x)=>s+num(x.valeur),0);
+  const ct=rows("contacts").filter(x=>x.type==="prospect"||x.type==="client");const pipeVal=ct.filter(x=>!["signe","perdu"].includes(x.etape)).reduce((s2,x)=>s2+num(x.valeur),0);
   const signed=ct.filter(x=>x.etape==="signe").length;
-  const bl=UI.biz?ordered().filter(b=>famIds(UI.biz).includes(b.id)):ordered();
-  return head(UI.biz?"Tableau de bord":new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}),UI.biz?esc(S.biz[UI.biz].name):(new Date().getHours()<18?"Bonjour Tullio":"Bonsoir Tullio"),UI.biz?esc(S.biz[UI.biz].activite||""):`${al.length?`${al.length} chose${al.length>1?"s":""} à faire avancer, on s'y met ?`:"Rien d'urgent : c'est le moment de faire grandir un projet."} ${bizList().length} projet${bizList().length>1?"s":""} suivi${bizList().length>1?"s":""}, chiffres ${y}.`,`<button class="btn" data-act="new" data-col="ops">+ Opération</button>${addBtn("jalons","Étape")}`)+`
+  const u=S.biz[UI.biz];const p=S.biz[UI.proj];const cur=p||u;
+  const cards=!u?tops():(p?[p]:(kids(u.id).length?kids(u.id):[u]));
+  const greet=new Date().getHours()<18?"Bonjour Tullio":"Bonsoir Tullio";
+  const hero=!u?`<div class="hero"><div class="hero-t"><div class="eyebrow">${new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}</div><h1>${greet}</h1><p class="sub">${al.length?`${al.length} chose${al.length>1?"s":""} à faire avancer aujourd'hui. On s'y met ?`:"Rien d'urgent : c'est le moment de faire grandir un projet."}</p></div>
+      <div class="hero-n"><div><b>${tops().length}</b><span>univers</span></div><div><b>${bizList().filter(b=>!isTop(b)).length+tops().filter(t=>!kids(t.id).length).length}</b><span>projets</span></div><div><b>${ms.filter(m=>m.statut!=="fait").length}</b><span>étapes à venir</span></div></div></div>`
+    :`<div class="hero" style="--pc:${bcol(cur)}"><div class="hero-t"><div class="eyebrow">${p?esc(u.name):esc(L(PHASES,u.phase))}</div><h1>${esc(cur.name)}</h1>${cur.activite?`<p class="sub">${esc(cur.activite)}</p>`:""}${cur.objectif?`<p class="goal"><b>Objectif</b> ${esc(cur.objectif)}</p>`:""}</div>
+      <div class="actions"><button class="btn" data-act="new" data-col="ops">+ Opération</button>${addBtn("jalons","Étape")}<button class="btn ghost" data-act="edit" data-col="biz" data-id="${cur.id}">Modifier</button></div></div>`;
+  return `${offline?`<div class="banner">La base de données n'est pas disponible dans cette vue : vous pouvez tester le logiciel, mais rien ne sera enregistré.</div>`:""}${hero}
   <div class="kpis">
     <div class="kpi"><span class="lab">Résultat ${y}</span><span class="val ${T.res>=0?"pos":"neg"}">${eur(T.res)}</span><span class="hint">${eur(T.in)} de recettes · ${eur(T.out)} de dépenses</span></div>
-    <div class="kpi"><span class="lab">Cotisations estimées</span><span class="val">${eur(c)}</span><span class="hint">selon le taux saisi par business</span></div>
     <div class="kpi"><span class="lab">Feuille de route</span><span class="val">${msDone}/${ms.length}</span><span class="hint">étapes terminées</span></div>
     <div class="kpi"><span class="lab">Pipeline commercial</span><span class="val">${eur(pipeVal)}</span><span class="hint">${ct.filter(x=>!["signe","perdu"].includes(x.etape)).length} en cours · ${signed} signé${signed>1?"s":""}</span></div>
+    <div class="kpi"><span class="lab">Cotisations estimées</span><span class="val">${eur(c)}</span><span class="hint">selon le taux de chaque business</span></div>
   </div>
-  <div class="grid2">
+  <div class="cols2">
     <section class="panel"><div class="panel-head"><h2>À traiter</h2><span class="n">${al.length}</span></div>
-      ${al.length?al.slice(0,14).map(alertRow).join(""):`<p class="empty">Rien d'urgent : pas d'étape à moins de 14 jours, pas de relance ni d'achat en attente.</p>`}</section>
-    <div class="stack">${bl.map(bizCard).join("")}</div>
-  </div>`}
+      ${al.length?al.slice(0,8).map(alertRow).join(""):`<p class="empty">Rien d'urgent : pas d'étape à moins de 14 jours, pas de relance ni d'achat en attente.</p>`}</section>
+    <section class="panel"><div class="panel-head"><h2>Prochaines étapes</h2>${u?`<a class="btn ghost sm" href="#${u.id}--feuille">Feuille de route →</a>`:""}</div>${nextSteps()}</section>
+  </div>
+  <div class="sect"><h2>${!u?"Mes univers":p?"Projet":kids(u.id).length?"Projets de l'univers":"Fiche"}</h2>${u&&!p?`<button class="btn sm" data-act="new" data-col="biz" data-parent="${u.id}">+ Projet</button>`:!u?`<button class="btn sm" data-act="new" data-col="biz">+ Univers ou business</button>`:""}</div>
+  <div class="cards">${cards.map(bizCard).join("")}</div>`}
 function bizStats(id){const ids=new Set(famIds(id));const yo=yearOps(new Date().getFullYear()).filter(o=>ids.has(o.biz));const T=totals(yo);
   const ms=Object.values(S.jalons).filter(m=>ids.has(m.biz));const done=ms.filter(m=>m.statut==="fait").length;
   const next=ms.filter(m=>m.statut!=="fait").sort((a,b)=>(a.date||"9")<(b.date||"9")?-1:1)[0];
@@ -460,11 +542,11 @@ function bizCard(b){const s=bizStats(b.id);const pi=PHASES.findIndex(p=>p[0]===b
   <div class="prog"><div class="bar"><i style="width:${s.ms.length?Math.round(s.done/s.ms.length*100):0}%"></i></div><span class="pctv">${s.done}/${s.ms.length} étapes</span></div>
   <div class="bstats"><div><b class="${s.T.res<0?"money out":""}">${eur(s.T.res)}</b><span>Résultat</span></div><div><b>${eur(s.T.in)}</b><span>Recettes</span></div><div><b>${s.clients}</b><span>Clients</span></div></div>
   ${isTop(b)&&kids(b.id).length?`<div class="bnext"><b>Projets de l'univers · ${kids(b.id).length}</b>${kids(b.id).map(k=>`<span class="bname" style="margin-right:10px"><span class="dot" style="--pc:${bcol(k)}"></span>${esc(k.name)}</span>`).join("")}</div>`:""}
-  <div class="actions"><button class="btn sm" data-act="biz" data-id="${b.id}">${UI.biz===b.id?"Affiché":"Afficher"}</button>${isTop(b)?`<button class="btn sm" data-act="new" data-col="biz" data-parent="${b.id}">+ Projet</button>`:""}<button class="btn sm ghost" data-act="edit" data-col="biz" data-id="${b.id}">Modifier</button></div></article>`}
+  <div class="actions"><button class="btn sm" data-act="biz" data-id="${b.id}">${isTop(b)?"Ouvrir":"Voir"}</button>${isTop(b)?`<button class="btn sm" data-act="new" data-col="biz" data-parent="${b.id}">+ Projet</button>`:""}<button class="btn sm ghost" data-act="edit" data-col="biz" data-id="${b.id}">Modifier</button></div></article>`}
 
 function vBusiness(){
   if(loading())return head("Mes business","Chargement…");
-  const T=tops();
+  const T=UI.biz&&S.biz[UI.biz]?[S.biz[UI.biz]]:tops();
   return head("Univers & projets","Portefeuille",`Un univers regroupe des projets du même thème (par exemple les livres de luxe ou les apps de cuisine). Les chiffres d'un univers additionnent ceux de ses projets. « Afficher » filtre tous les onglets.`,addBtn("biz","Univers ou business"))+
   (T.length?`<div class="univs">${T.map(t=>{const K=kids(t.id);return `<section class="univ" style="--pc:${bcol(t)}"><div class="uh"><h2><span class="dot"></span>${esc(t.name)}</h2><span class="pctv">${K.length?K.length+" projet"+(K.length>1?"s":""):"business seul"}</span></div><div class="cards">${bizCard(t)}${K.map(bizCard).join("")}<button class="addcard" data-act="new" data-col="biz" data-parent="${t.id}">+ Nouveau projet dans « ${esc(t.name)} »</button></div></section>`}).join("")}</div>`:emptyBiz())}
 
@@ -507,9 +589,9 @@ function vFinances(){
       ${cats.length?`<div class="cats">${cats.map(([k,v])=>`<div class="cat"><span>${esc(k)}</span><span class="money">${eur(v)}</span><div class="bar"><i style="width:${v/cmx*100}%"></i></div></div>`).join("")}</div>`:`<p class="empty">Aucune dépense en ${y}.</p>`}</section>
   </div>
   <div class="filters"><input type="search" id="q" placeholder="Rechercher un libellé ou une catégorie" value="${esc(UI.q)}" aria-label="Rechercher"><div class="seg" role="group" aria-label="Type">${[["","Tout"],["recette","Recettes"],["depense","Dépenses"]].map(([k,l])=>`<button data-act="optype" data-k="${k}" aria-pressed="${UI.opType===k}">${l}</button>`).join("")}</div></div>
-  ${list.length?`<div class="twrap"><table><thead><tr><th>Date</th><th>Libellé</th>${UI.biz?"":"<th>Business</th>"}<th>Catégorie</th><th class="r">Montant</th></tr></thead><tbody>
-  ${list.map(o=>`<tr data-act="edit" data-col="${o.src}" data-id="${o.id}" tabindex="0"><td class="money">${fmt(o.date)}</td><td>${esc(o.libelle)}${o.src==="achats"?`<span class="sm">depuis l'onglet Achats</span>`:""}</td>${UI.biz?"":`<td>${bTag(o.biz)}</td>`}<td>${esc(o.categorie||"—")}</td><td class="r"><span class="money ${o.type==="recette"?"in":"out"}">${o.type==="recette"?"+":"−"} ${eur2(o.montant)}</span></td></tr>`).join("")}
-  </tbody><tfoot><tr><td colspan="${UI.biz?3:4}">Total affiché</td><td class="r money">${eur2(totals(list).res)}</td></tr></tfoot></table></div>`:`<div class="panel"><p class="empty">Aucune opération ${UI.opType==="recette"?"de recette ":UI.opType==="depense"?"de dépense ":""}en ${y}. Ajoutez la première avec « + Opération ».</p></div>`}`}
+  ${list.length?`<div class="twrap"><table><thead><tr><th>Date</th><th>Libellé</th>${hideTag()?"":"<th>Business</th>"}<th>Catégorie</th><th class="r">Montant</th></tr></thead><tbody>
+  ${list.map(o=>`<tr data-act="edit" data-col="${o.src}" data-id="${o.id}" tabindex="0"><td class="money">${fmt(o.date)}</td><td>${esc(o.libelle)}${o.src==="achats"?`<span class="sm">depuis l'onglet Achats</span>`:""}</td>${hideTag()?"":`<td>${bTag(o.biz)}</td>`}<td>${esc(o.categorie||"—")}</td><td class="r"><span class="money ${o.type==="recette"?"in":"out"}">${o.type==="recette"?"+":"−"} ${eur2(o.montant)}</span></td></tr>`).join("")}
+  </tbody><tfoot><tr><td colspan="${hideTag()?3:4}">Total affiché</td><td class="r money">${eur2(totals(list).res)}</td></tr></tfoot></table></div>`:`<div class="panel"><p class="empty">Aucune opération ${UI.opType==="recette"?"de recette ":UI.opType==="depense"?"de dépense ":""}en ${y}. Ajoutez la première avec « + Opération ».</p></div>`}`}
 
 function vAchats(){
   if(loading())return head("Achats","Chargement…");
@@ -520,7 +602,7 @@ function vAchats(){
   const paid=all.filter(a=>a.paye).reduce((s,a)=>s+num(a.montant),0);
   const sup={};all.forEach(a=>{if(a.fournisseur){const k=a.fournisseur.trim();sup[k]=sup[k]||{n:0,m:0};sup[k].n++;sup[k].m+=num(a.montant)}});
   const supL=Object.entries(sup).sort((a,b)=>b[1].m-a[1].m);
-  const card=a=>{const b=S.biz[a.biz];return `<button class="kcard" style="--pc:${bcol(b)}" data-act="edit" data-col="achats" data-id="${a.id}"><b>${esc(a.article)}</b><span class="meta">${a.fournisseur?esc(a.fournisseur):""}${num(a.quantite)>1?` · ×${num(a.quantite)}`:""}${a.statut==="recu"?(a.paye?`<span class="chip ok">Payé</span>`:`<span class="chip warn">À payer</span>`):""}<span class="money">${a.montant?eur(a.montant):""}</span></span>${UI.biz?"":`<span class="meta">${bTag(a.biz)}</span>`}</button>`};
+  const card=a=>{const b=S.biz[a.biz];return `<button class="kcard" style="--pc:${bcol(b)}" data-act="edit" data-col="achats" data-id="${a.id}"><b>${esc(a.article)}</b><span class="meta">${a.fournisseur?esc(a.fournisseur):""}${num(a.quantite)>1?` · ×${num(a.quantite)}`:""}${a.statut==="recu"?(a.paye?`<span class="chip ok">Payé</span>`:`<span class="chip warn">À payer</span>`):""}<span class="money">${a.montant?eur(a.montant):""}</span></span>${hideTag()?"":`<span class="meta">${bTag(a.biz)}</span>`}</button>`};
   const col=k=>{let L2=all.filter(a=>a.statut===k);if(k==="recu"&&!UI.achShowDone)L2=L2.filter(a=>!a.paye);const tot=L2.reduce((s,a)=>s+num(a.montant),0);
     return `<div class="kcol"><h3><span>${L(ACH_ST,k)} · ${L2.length}</span><span class="money">${tot?eur(tot):""}</span></h3>${L2.sort((a,b)=>(a.date||"")<(b.date||"")?1:-1).map(card).join("")||`<p class="empty" style="padding:4px">Vide</p>`}</div>`};
   return head("Achats","Commandes et fournisseurs","Suivez chaque achat de la validation à la réception. Cochez « Payé » pour qu'il compte dans les finances.",`<label class="btn ghost" style="cursor:pointer"><input type="checkbox" id="achdone" ${UI.achShowDone?"checked":""}> Afficher les achats payés</label>${addBtn("achats","Achat")}`)+`
@@ -542,8 +624,8 @@ function vContacts(){
   return head("Clients & contacts","Prospects, clients et partenaires","Le pipeline compte les prospects et clients par étape. Cliquez sur une étape pour filtrer la liste.",addBtn("contacts","Contact"))+`
   <div class="pipe">${CT_STEP.map(([k,l])=>{const s=sales.filter(c=>c.etape===k);return `<button data-act="ctstep" data-k="${k}" aria-pressed="${UI.ctStep===k}"><span>${l}</span><b>${s.length}</b><small>${eur(s.reduce((t,c)=>t+num(c.valeur),0))}</small></button>`}).join("")}</div>
   <div class="filters"><input type="search" id="q" placeholder="Rechercher un nom, une entreprise, une ville" value="${esc(UI.q)}" aria-label="Rechercher"><div class="seg" role="group" aria-label="Type">${[["","Tous"]].concat(CT_TYPE).map(([k,l])=>`<button data-act="cttype" data-k="${k}" aria-pressed="${UI.ctType===k}">${l}</button>`).join("")}</div></div>
-  ${list.length?`<div class="twrap"><table><thead><tr><th>Nom</th><th>Type</th><th>Étape</th>${UI.biz?"":"<th>Business</th>"}<th>Coordonnées</th><th>Relance</th><th class="r">Valeur</th></tr></thead><tbody>
-  ${list.map(c=>{const sale=c.type==="prospect"||c.type==="client";return `<tr data-act="edit" data-col="contacts" data-id="${c.id}" tabindex="0"><td><b style="font-weight:500">${esc(c.nom)}</b>${c.entreprise||c.ville?`<span class="sm">${esc([c.entreprise,c.ville].filter(Boolean).join(" · "))}</span>`:""}</td><td>${esc(L(CT_TYPE,c.type))}</td><td>${sale?`<span class="chip ${c.etape==="signe"?"ok":c.etape==="perdu"?"":c.etape==="devis"||c.etape==="rdv"?"info":"acc"}">${esc(L(CT_STEP,c.etape))}</span>`:"—"}</td>${UI.biz?"":`<td>${bTag(c.biz)}</td>`}<td><span class="sm" style="color:var(--fg)">${esc(c.tel||"")}</span><span class="sm">${esc(c.email||"")}</span></td><td>${c.relance?dueChip(c.relance,c.etape==="signe"||c.etape==="perdu"):"—"}</td><td class="r money">${c.valeur?eur(c.valeur):"—"}</td></tr>`}).join("")}
+  ${list.length?`<div class="twrap"><table><thead><tr><th>Nom</th><th>Type</th><th>Étape</th>${hideTag()?"":"<th>Business</th>"}<th>Coordonnées</th><th>Relance</th><th class="r">Valeur</th></tr></thead><tbody>
+  ${list.map(c=>{const sale=c.type==="prospect"||c.type==="client";return `<tr data-act="edit" data-col="contacts" data-id="${c.id}" tabindex="0"><td><b style="font-weight:500">${esc(c.nom)}</b>${c.entreprise||c.ville?`<span class="sm">${esc([c.entreprise,c.ville].filter(Boolean).join(" · "))}</span>`:""}</td><td>${esc(L(CT_TYPE,c.type))}</td><td>${sale?`<span class="chip ${c.etape==="signe"?"ok":c.etape==="perdu"?"":c.etape==="devis"||c.etape==="rdv"?"info":"acc"}">${esc(L(CT_STEP,c.etape))}</span>`:"—"}</td>${hideTag()?"":`<td>${bTag(c.biz)}</td>`}<td><span class="sm" style="color:var(--fg)">${esc(c.tel||"")}</span><span class="sm">${esc(c.email||"")}</span></td><td>${c.relance?dueChip(c.relance,c.etape==="signe"||c.etape==="perdu"):"—"}</td><td class="r money">${c.valeur?eur(c.valeur):"—"}</td></tr>`}).join("")}
   </tbody></table></div>`:`<div class="panel"><p class="empty">${all.length?"Aucun contact ne correspond.":"Aucun contact. Ajoutez vos premiers prospects avec « + Contact »."}</p></div>`}`}
 
 function vMarketing(){
@@ -561,7 +643,7 @@ function vMarketing(){
     <div class="kpi"><span class="lab">Coût par contact</span><span class="val">${leads?eur(spent/leads):"—"}</span><span class="hint">actions lancées ou terminées</span></div>
   </div>
   <div class="grid2">
-    <section class="panel">${all.length?grp.filter(g=>g[1].length).map(g=>`<div class="glabel">${g[0]} · ${g[1].length}</div>${g[1].map(m=>`<div class="item"><div><button class="t" data-act="edit" data-col="marketing" data-id="${m.id}">${esc(m.titre)}</button><div class="meta"><span class="chip">${esc(m.canal||"")}</span>${UI.biz?"":bTag(m.biz)}${m.budget?`<span class="money">${eur(m.budget)}</span>`:""}${m.leads?`<span>${num(m.leads)} contact${num(m.leads)>1?"s":""}</span>`:""}</div></div><div>${m.date?dueChip(m.date,m.statut==="termine"):""}</div></div>`).join("")}`).join(""):`<p class="empty">Aucune action. Ajoutez par exemple une tournée de prospection ou un post LinkedIn.</p>`}</section>
+    <section class="panel">${all.length?grp.filter(g=>g[1].length).map(g=>`<div class="glabel">${g[0]} · ${g[1].length}</div>${g[1].map(m=>`<div class="item"><div><button class="t" data-act="edit" data-col="marketing" data-id="${m.id}">${esc(m.titre)}</button><div class="meta"><span class="chip">${esc(m.canal||"")}</span>${hideTag()?"":bTag(m.biz)}${m.budget?`<span class="money">${eur(m.budget)}</span>`:""}${m.leads?`<span>${num(m.leads)} contact${num(m.leads)>1?"s":""}</span>`:""}</div></div><div>${m.date?dueChip(m.date,m.statut==="termine"):""}</div></div>`).join("")}`).join(""):`<p class="empty">Aucune action. Ajoutez par exemple une tournée de prospection ou un post LinkedIn.</p>`}</section>
     <section class="panel"><div class="panel-head"><h2>Par canal</h2></div>${Object.keys(byC).length?`<div class="twrap" style="border:0"><table><thead><tr><th>Canal</th><th class="r">Actions</th><th class="r">Contacts</th><th class="r">Budget</th></tr></thead><tbody>${Object.entries(byC).sort((a,b)=>b[1].l-a[1].l).map(([k,v])=>`<tr style="cursor:default"><td>${esc(k)}</td><td class="r money">${v.n}</td><td class="r money">${v.l}</td><td class="r money">${eur(v.b)}</td></tr>`).join("")}</tbody></table></div>`:`<p class="empty">Le bilan par canal apparaîtra ici.</p>`}</section>
   </div>`}
 
@@ -572,7 +654,7 @@ function vAmeliorations(){
   const month=TODAY.slice(0,7);const shipped=all.filter(x=>x.statut==="livre"&&(x.livreLe||"").slice(0,7)===month);
   const vis=all.filter(x=>!UI.amType||x.type===UI.amType);
   const PR={haute:0,moyenne:1,basse:2};
-  const card=x=>{const b=S.biz[x.biz];return `<button class="kcard" style="--pc:${bcol(b)}" data-act="edit" data-col="ameliorations" data-id="${x.id}"><b>${esc(x.titre)}</b>${x.description?`<span class="desc">${esc(x.description)}</span>`:""}<span class="meta"><span class="chip ${x.type==="Bug"?"bad":"info"}">${esc(x.type||"")}</span>${x.priorite==="haute"?`<span class="chip warn">Priorité haute</span>`:""}${x.version?`<span class="chip">v${esc(x.version.replace(/^v/i,""))}</span>`:""}${x.spec?`<span title="Demande détaillée prête">✦</span>`:""}</span>${UI.biz?"":`<span class="meta">${bTag(x.biz)}</span>`}</button>`};
+  const card=x=>{const b=S.biz[x.biz];return `<button class="kcard" style="--pc:${bcol(b)}" data-act="edit" data-col="ameliorations" data-id="${x.id}"><b>${esc(x.titre)}</b>${x.description?`<span class="desc">${esc(x.description)}</span>`:""}<span class="meta"><span class="chip ${x.type==="Bug"?"bad":"info"}">${esc(x.type||"")}</span>${x.priorite==="haute"?`<span class="chip warn">Priorité haute</span>`:""}${x.version?`<span class="chip">v${esc(x.version.replace(/^v/i,""))}</span>`:""}${x.spec?`<span title="Demande détaillée prête">✦</span>`:""}</span>${hideTag()?"":`<span class="meta">${bTag(x.biz)}</span>`}</button>`};
   const cols=AM_ST.filter(s=>UI.amShowDone||s[0]!=="livre");
   return head("Améliorations apps","Évolutions de vos apps","Notez chaque idée, bug ou fonctionnalité, faites-la avancer d'une colonne à l'autre, et laissez Claude rédiger la demande détaillée depuis la fiche.",`<label class="btn ghost" style="cursor:pointer"><input type="checkbox" id="amdone" ${UI.amShowDone?"checked":""}> Afficher les livrées</label>${addBtn("ameliorations","Amélioration")}`)+`
   <div class="kpis">
@@ -591,7 +673,7 @@ function vDocuments(){
   const groups=DOC_TYPE.map(t=>[t,list.filter(d=>(d.type||"Autre")===t)]).filter(g=>g[1].length);
   return head("Documents","Bibliothèque","Les liens vers vos documents de référence : business plan, statuts, contrats, supports marketing…",addBtn("docs","Document"))+`
   <div class="filters"><input type="search" id="q" placeholder="Rechercher un document" value="${esc(UI.q)}" aria-label="Rechercher"></div>
-  <section class="panel">${groups.length?groups.map(([t,L2])=>`<div class="glabel">${esc(t)} · ${L2.length}</div>${L2.map(d=>{const u=safeUrl(d.url);return `<div class="item"><div style="min-width:0">${u?`<a class="lk" href="${esc(u)}" target="_blank" rel="noopener">${esc(d.titre)} ↗</a>`:esc(d.titre)}<div class="meta">${UI.biz?"":bTag(d.biz)}${d.note?`<span>${esc(d.note)}</span>`:""}</div></div><button class="btn sm ghost" data-act="edit" data-col="docs" data-id="${d.id}">Modifier</button></div>`}).join("")}`).join(""):`<p class="empty">${all.length?"Aucun document ne correspond.":"Aucun document. Ajoutez le lien de votre business plan pour commencer."}</p>`}</section>`}
+  <section class="panel">${groups.length?groups.map(([t,L2])=>`<div class="glabel">${esc(t)} · ${L2.length}</div>${L2.map(d=>{const u=safeUrl(d.url);return `<div class="item"><div style="min-width:0">${u?`<a class="lk" href="${esc(u)}" target="_blank" rel="noopener">${esc(d.titre)} ↗</a>`:esc(d.titre)}<div class="meta">${hideTag()?"":bTag(d.biz)}${d.note?`<span>${esc(d.note)}</span>`:""}</div></div><button class="btn sm ghost" data-act="edit" data-col="docs" data-id="${d.id}">Modifier</button></div>`}).join("")}`).join(""):`<p class="empty">${all.length?"Aucun document ne correspond.":"Aucun document. Ajoutez le lien de votre business plan pour commencer."}</p>`}</section>`}
 
 /* ================= Rendu ================= */
 const VIEWS={tableau:vTableau,business:vBusiness,feuille:vFeuille,finances:vFinances,achats:vAchats,contacts:vContacts,marketing:vMarketing,ameliorations:vAmeliorations,documents:vDocuments};
@@ -601,35 +683,54 @@ const ICONS={
   finances:'<svg viewBox="0 0 24 24"><path d="M4 19V9"/><path d="M10 19V5"/><path d="M16 19v-7"/><path d="M22 19H2"/></svg>',
   commercial:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"/><path d="M18.5 14.8c1.6.8 2.7 2.5 3 5.2"/></svg>',
   apps:'<svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/><path d="m10 9 2-2 2 2"/><path d="M12 7v6"/></svg>'};
-const GROUPS=[{k:"accueil",l:"Accueil",v:[["tableau","Tableau de bord"]]},{k:"projets",l:"Projets",v:[["business","Univers & projets"],["feuille","Feuille de route"],["documents","Documents"]]},{k:"finances",l:"Finances",v:[["finances","Trésorerie"],["achats","Achats"]]},{k:"commercial",l:"Commercial",v:[["contacts","Clients & contacts"],["marketing","Marketing"]]},{k:"apps",l:"Apps",v:[["ameliorations","Améliorations"]]}];
-const groupOf=v=>GROUPS.find(g=>g.v.some(x=>x[0]===v))||GROUPS[0];
-const LAST={};
+const VICON={
+  tableau:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5" rx="2"/><rect x="3" y="15" width="7.5" height="6" rx="2"/><rect x="13.5" y="11" width="7.5" height="10" rx="2"/></svg>',
+  business:'<svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2.5h7.5A2.5 2.5 0 0 1 21 10v7.5a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/></svg>',
+  feuille:'<svg viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/></svg>',
+  finances:'<svg viewBox="0 0 24 24"><path d="M4 19V10"/><path d="M10 19V5"/><path d="M16 19v-6"/><path d="M21 19H3"/></svg>',
+  achats:'<svg viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 11h10.6L20.5 8H6.6"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>',
+  contacts:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8"/><path d="M18.5 14.8c1.6.8 2.7 2.5 3 5.2"/></svg>',
+  marketing:'<svg viewBox="0 0 24 24"><path d="M3 10v4h3l7 4.5V5.5L6 10z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>',
+  ameliorations:'<svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/><path d="m10 9 2-2 2 2"/><path d="M12 7v6"/></svg>',
+  documents:'<svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>'};
+const UVIEWS=[["tableau","Vue d'ensemble"],["business","Projets"],["feuille","Feuille de route"],["finances","Finances"],["achats","Achats"],["contacts","Clients"],["marketing","Marketing"],["ameliorations","Améliorations apps"],["documents","Documents"]];
+const initials=n=>{const w=String(n||"?").replace(/[^\p{L}\p{N} ]/gu," ").trim().split(/\s+/).filter(x=>(x.length>1||/\d/.test(x))&&!/^(de|du|des|la|le|les|et|en|au|aux|the|of)$/i.test(x));return ((w[0]||"?")[0]+(w[1]?w[1][0]:"")).toUpperCase()};
+const shortName=n=>{n=String(n||"");return n.length>13?n.slice(0,12).trim()+"…":n};
 function renderChrome(){
   $("#today").textContent=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
-  if(UI.biz&&!S.biz[UI.biz]&&!loading())UI.biz="";
-  const b=S.biz[UI.biz];
-  $("#bizpill").innerHTML=b?`<span class="dot" style="--pc:${bcol(b)}"></span><span class="nm">${esc(b.name)}</span><span class="chev">▼</span>`:`<span class="dot all"></span><span class="nm">Tous mes projets</span><span class="chev">▼</span>`;
-  $("#bizpill").setAttribute("aria-label","Choisir le projet affiché : "+(b?b.name:"tous"));
-  const g=groupOf(UI.view);LAST[g.k]=UI.view;
-  const st=$("#subtabs");st.hidden=g.v.length<2;st.innerHTML=g.v.map(([k,l])=>`<a href="#${k}" ${k===UI.view?'aria-current="page"':""}>${l}</a>`).join("");
-  const late=loading()?0:alerts().filter(a=>a.late).length;
-  const bugs=loading()?0:Object.values(S.ameliorations).filter(x=>x.type==="Bug"&&x.statut!=="livre"&&inBiz(x)).length;
-  const badge={accueil:late,apps:bugs};
-  $("#tabbar").innerHTML=GROUPS.map(x=>`<a href="#${LAST[x.k]||x.v[0][0]}" ${x===g?'aria-current="page"':""}>${ICONS[x.k]}<span>${x.l}</span>${badge[x.k]?`<span class="n" aria-label="${badge[x.k]} à traiter">${badge[x.k]}</span>`:""}</a>`).join("");
+  const u=S.biz[UI.biz];
+  const st=$("#subtabs");
+  const base=u?u.id:"accueil";
+  st.style.setProperty("--pc",u?bcol(u):"var(--accent)");
+  st.innerHTML=`<div class="rail-h">${u?`<span class="ti">${esc(initials(u.name))}</span>`:`<span class="ti home">${ICONS.accueil}</span>`}<div><small>${u?"Univers":"Vue globale"}</small><b>${u?esc(u.name):"Tous mes projets"}</b></div></div>`+
+    UVIEWS.map(([k,l])=>`<a href="#${base}--${k}" ${k===UI.view?'aria-current="page"':""}>${VICON[k]}<span>${!u&&k==="tableau"?"Accueil":l}</span></a>`).join("")+
+    `<div class="rail-f">${u?`<a href="#accueil" class="back">← Tous mes projets</a>`:`<button class="back" data-act="new" data-col="biz">＋ Nouvel univers</button>`}</div>`;
+  const pc=$("#projchips");const K=u?kids(u.id):[];
+  if(K.length){pc.hidden=false;pc.innerHTML=`<button data-act="proj" data-id="" aria-pressed="${!UI.proj}">Tout l'univers</button>`+K.map(k=>`<button data-act="proj" data-id="${k.id}" aria-pressed="${UI.proj===k.id}" style="--pc:${bcol(k)}"><span class="dot"></span>${esc(k.name)}</button>`).join("")}else{pc.hidden=true;pc.innerHTML=""}
+  const late=id=>{if(loading())return 0;const ids=new Set(famIds(id));const sv=[UI.biz,UI.proj];UI.biz=id;UI.proj="";const n=alerts().filter(a=>a.late||a.bad).length;UI.biz=sv[0];UI.proj=sv[1];return n};
+  const homeLate=loading()?0:(()=>{const sv=[UI.biz,UI.proj];UI.biz="";UI.proj="";const n=alerts().filter(a=>a.late).length;UI.biz=sv[0];UI.proj=sv[1];return n})();
+  $("#tabbar").innerHTML=`<a href="#accueil" ${!u?'aria-current="page"':""}><span class="ti home">${ICONS.accueil}</span><span class="tl">Accueil</span>${homeLate?`<span class="n">${homeLate}</span>`:""}</a>`+
+    tops().map(t=>{const n=late(t.id);return `<a href="#${t.id}" ${u&&u.id===t.id?'aria-current="page"':""} style="--pc:${bcol(t)}" title="${esc(t.name)}"><span class="ti">${esc(initials(t.name))}</span><span class="tl">${esc(shortName(t.name))}</span>${n?`<span class="n">${n}</span>`:""}</a>`}).join("")+
+    `<button data-act="new" data-col="biz" class="tadd" aria-label="Nouvel univers ou business"><span class="ti">＋</span><span class="tl">Nouveau</span></button>`;
+  for(const sel of ["#subtabs a[aria-current=page]","#tabbar a[aria-current=page]"]){const c=$(sel);if(c&&c.parentNode.scrollWidth>c.parentNode.clientWidth){const P=c.parentNode;P.scrollLeft=c.offsetLeft-(P.clientWidth-c.offsetWidth)/2}}
 }
 function openSheet(){
-  $("#layer").innerHTML=`<div class="sheet-wrap" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-label="Choisir le projet affiché"><div class="grab"></div><h2>Afficher</h2>
-  <button class="opt" data-act="biz" data-id="" aria-pressed="${!UI.biz}"><span class="dot all"></span>Tous mes projets</button><div class="sep"></div>
-  ${ordered().map(b=>`<button class="opt ${isTop(b)?"":"sub"}" data-act="biz" data-id="${b.id}" aria-pressed="${UI.biz===b.id}"><span class="dot" style="--pc:${bcol(b)}"></span>${esc(b.name)}${isTop(b)&&kids(b.id).length?`<small>${kids(b.id).length} projet${kids(b.id).length>1?"s":""}</small>`:""}</button>`).join("")}
-  <div class="sep"></div><button class="opt" data-act="new" data-col="biz" style="color:var(--accent)">＋ Nouvel univers ou business</button>
+  $("#layer").innerHTML=`<div class="sheet-wrap" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-label="Menu"><div class="grab"></div><h2>Menu</h2>
+  <button class="opt" data-act="new" data-col="biz" style="color:var(--accent)">＋ Nouvel univers ou business</button>
   <div class="sep"></div><h2 style="margin-top:12px">Sauvegarde</h2>
   <button class="opt" data-act="export">⤓ Exporter toutes les données<small>fichier .json</small></button>
   <label class="opt" style="cursor:pointer">⤒ Restaurer depuis un fichier<small>remplace les éléments du même nom</small><input type="file" id="importfile" accept="application/json,.json" hidden></label></div></div>`;
-  const f=$("#layer .opt[aria-pressed=true]")||$("#layer .opt");if(f)f.focus()}
+  const f=$("#layer .opt");if(f)f.focus()}
 function render(){renderChrome();const m=$("#main");const a=document.activeElement;const keep=a&&a.id&&m.contains(a)?{id:a.id,s:a.selectionStart}:null;
   m.innerHTML=(VIEWS[UI.view]||vTableau)();
   if(keep){const el=document.getElementById(keep.id);if(el){el.focus();try{if(keep.s!=null)el.setSelectionRange(keep.s,keep.s)}catch(e){}}}}
-function route(){const h=location.hash.slice(1);UI.view=VIEWS[h]?h:"tableau";UI.q="";render();window.scrollTo(0,0)}
+function route(){const h=decodeURIComponent(location.hash.slice(1));const [a,b]=h.split("--");UI.q="";
+  if(a==="accueil"){UI.biz="";UI.proj="";UI.view=VIEWS[b]?b:"tableau"}
+  else if(a&&S.biz[a]&&isTop(S.biz[a])){if(UI.biz!==a)UI.proj="";UI.biz=a;UI.view=VIEWS[b]?b:"tableau"}
+  else if(a&&S.biz[a]){const t=S.biz[a];UI.biz=t.parent;UI.proj=t.id;UI.view=VIEWS[b]?b:"tableau"}
+  else if(a&&a!=="accueil"&&loading()){UI.pending=h}
+  else{UI.biz="";UI.proj="";UI.view="tableau"}
+  render();window.scrollTo(0,0)}
 window.addEventListener("hashchange",route);
 
 /* ================= Formulaires ================= */
@@ -649,7 +750,7 @@ function fieldHtml(f,v,rec){const id="f-"+f.k;const val=v==null?"":v;let input;
 function openForm(col,rec,preset){
   const sc=SCHEMA[col];const isNew=!rec;
   if(col!=="biz"&&col!=="contacts"&&col!=="docs"&&!bizList().length){toast("Créez d'abord un business.");openForm("biz");return}
-  if(!rec){rec={};sc.fields.forEach(f=>{if(f.def!=null)rec[f.k]=f.def;if(f.today)rec[f.k]=TODAY;if(f.t==="biz")rec[f.k]=UI.biz||(f.req&&bizList()[0]||{}).id||""});if(col==="biz")rec.color=COLORS[bizList().length%COLORS.length];Object.assign(rec,preset||{})}
+  if(!rec){rec={};sc.fields.forEach(f=>{if(f.def!=null)rec[f.k]=f.def;if(f.today)rec[f.k]=TODAY;if(f.t==="biz")rec[f.k]=scope()||(f.req&&bizList()[0]||{}).id||""});if(col==="biz")rec.color=COLORS[bizList().length%COLORS.length];Object.assign(rec,preset||{})}
   const title=(isNew?"Nouveau ":"Modifier ")+(col==="ops"?"une opération":col==="marketing"?"l'action":col==="jalons"?"l'étape":sc.one);
   $("#layer").innerHTML=`<div class="overlay" data-act="overlay"><form class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}" id="mform"><h2>${isNew?(col==="ops"?"Nouvelle opération":col==="jalons"?"Nouvelle étape":col==="marketing"?"Nouvelle action marketing":"Nouveau "+sc.one):title}</h2>
     <div class="fgrid">${sc.fields.map(f=>fieldHtml(f,rec[f.k],rec)).join("")}</div><div id="delzone"></div>
@@ -680,7 +781,8 @@ document.addEventListener("click",async e=>{const el=e.target.closest("[data-act
       const dl=window.claude&&window.claude.use?await window.claude.use("downloads"):null;if(!dl){toast("L'export n'est pas disponible ici.");break}
       try{await dl.save({filename:"qg-business-"+TODAY+".json",data:new Blob([JSON.stringify({app:"qg-business",exportedAt:new Date().toISOString(),docs:out},null,1)],{type:"application/json"})});toast("Sauvegarde exportée")}catch(err){if(!(err&&err.code==="declined"))toast("Export impossible : "+((err&&err.message)||"erreur"))}break}
     case "theme":{const r=document.documentElement;const dark=r.dataset.theme!=="dark";if(dark)r.dataset.theme="dark";else r.dataset.theme="light";try{localStorage.setItem("qg-theme",r.dataset.theme)}catch(err){}themeBtn();break}
-    case "biz":closeModal();UI.biz=id||"";try{localStorage.setItem("qg-biz",UI.biz)}catch(err){}render();break;
+    case "biz":{closeModal();const b=S.biz[id];location.hash=!b?"accueil":isTop(b)?b.id:b.parent+"--tableau";if(b&&!isTop(b)){UI.biz=b.parent;UI.proj=b.id;render()}break}
+    case "proj":UI.proj=id||"";render();break;
     case "ms-toggle":{const m=S.jalons[id];if(m)await updDoc("jalons",id,{statut:m.statut==="fait"?"a_faire":"fait",updatedAt:new Date().toISOString()});break}
     case "ask-del":{const extra=col==="biz"?" Ses étapes, opérations, achats et actions resteront enregistrés mais sans business.":"";$("#delzone").innerHTML=`<div class="confirm">Supprimer définitivement ?${extra}<button type="button" class="btn danger sm" data-act="del" data-col="${col}" data-id="${id}">Oui, supprimer</button></div>`;break}
     case "del":if(await delDoc(col,id)){closeModal();toast("Supprimé")}break;
@@ -736,7 +838,7 @@ route();
   use("sample").then(x=>{sample=x});
   db=await use("db");
   if(!db){offline=true;render();return}
-  COLS.forEach(col=>db.collection(col).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]={...d.data(),id:d.id}});S[col]=o;S.ready[col]=true;render()},err=>{S.ready[col]=true;toast("Lecture impossible : "+((err&&err.message)||"erreur"));render()}));
+  COLS.forEach(col=>db.collection(col).onSnapshot(snap=>{const o={};snap.docs.forEach(d=>{o[d.id]={...d.data(),id:d.id}});S[col]=o;S.ready[col]=true;if(UI.pending&&!loading()){UI.pending="";route();return}if(UI.biz&&!S.biz[UI.biz]&&!loading()){location.hash="accueil";return}render()},err=>{S.ready[col]=true;toast("Lecture impossible : "+((err&&err.message)||"erreur"));render()}));
 })();
 })();
 </script>
