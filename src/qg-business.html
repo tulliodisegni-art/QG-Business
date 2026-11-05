@@ -424,6 +424,15 @@ a.lk:hover{text-decoration:underline}
 .coach{max-width:680px}
 .coachout{white-space:pre-wrap;line-height:1.6;font-size:15px;background:var(--surface-2);border-radius:16px;padding:16px 18px;margin-top:12px;min-height:120px;max-height:62vh;overflow:auto}
 @media (max-width:420px){.top-r{gap:6px}.round{width:34px;height:34px}}
+
+.nlist{display:flex;flex-direction:column;gap:6px}
+.nk{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:var(--surface-2);cursor:pointer}
+.nk .ni{font-size:20px;width:28px;text-align:center}.nk .nt{flex:1;min-width:0}.nk b{display:block;font-size:14.5px}.nk small{color:var(--muted);font-size:12.5px}
+.sw{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:28px;border-radius:99px;background:var(--line);position:relative;cursor:pointer;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .2s}
+.sw:checked{background:var(--accent)}.sw:checked::after{transform:translateX(18px)}
+.sw:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.notifs{max-width:620px}
 </style>
 
 <div class="shell">
@@ -1109,6 +1118,54 @@ function renderChrome(){renderTimer();
     `<button data-act="new" data-col="biz" class="tadd" aria-label="Nouvel univers ou business"><span class="ti">＋</span><span class="tl">Nouveau</span></button>`;
   for(const sel of ["#subtabs a[aria-current=page]","#tabbar a[aria-current=page]"]){const c=$(sel);if(c&&c.parentNode.scrollWidth>c.parentNode.clientWidth){const P=c.parentNode;P.scrollLeft=c.offsetLeft-(P.clientWidth-c.offsetWidth)/2}}
 }
+/* ================= Notifications ================= */
+const NKINDS=[
+  {k:"etapes",ic:"🚩",t:"Étapes du jour",d:"Le matin, les étapes prévues aujourd'hui et celles en retard."},
+  {k:"priorites",ic:"⭐",t:"Priorités de la semaine",d:"Le lundi matin : vos 3 priorités, ou un rappel pour les choisir."},
+  {k:"revue",ic:"✦",t:"Revue du dimanche",d:"Le dimanche à 18 h : 10 minutes pour faire le point."},
+  {k:"relances",ic:"📞",t:"Relances clients",d:"Le matin du jour où un prospect ou un client est à relancer."},
+  {k:"devis",ic:"📝",t:"Devis sans réponse",d:"7 jours après l'envoi d'un devis, s'il n'est ni accepté ni refusé."},
+  {k:"factures",ic:"💶",t:"Factures à encaisser",d:"Le jour de l'échéance, puis 3 jours après si elle n'est pas payée."},
+  {k:"urssaf",ic:"🏛️",t:"URSSAF, CFE et impôts",d:"7 jours puis 1 jour avant chaque déclaration, avec le montant."},
+  {k:"achats",ic:"🛒",t:"Achats à faire",d:"Le matin du jour prévu pour une commande."},
+  {k:"marketing",ic:"📣",t:"Actions marketing",d:"Le matin d'une action marketing prévue."},
+  {k:"chrono",ic:"⏱",t:"Chrono oublié",d:"Si le chrono tourne depuis 3 heures."}];
+function pushPlan(){const P=window.QG&&window.QG.push;if(!P||loading())return null;const H=P.heure();const now=Date.now();const items=[];
+  const at=(d,hm,plus=0)=>{const [h,m]=String(hm).split(":").map(Number);const x=toDate(d);x.setHours(h||0,(m||0)+plus,0,0);return x};
+  const add=(kind,key,date,title,body,url)=>{if(date.getTime()>now+30000)items.push({kind,key,send_at:date.toISOString(),title,body:body||"",url:url||"./"})};
+  const first=at(TODAY,H).getTime()>now?TODAY:addDays(TODAY,1);const names=l=>l.slice(0,3).join(", ")+(l.length>3?` et ${l.length-3} autre${l.length>4?"s":""}`:"");
+  const J=Object.values(S.jalons).filter(m=>m.statut!=="fait"&&m.date);const live=b=>{const x=S.biz[b];return !x||x.statut!=="arrete"};
+  const bz=id=>{const b=S.biz[id];return !b?"":isTop(b)?b.id:b.parent};
+  for(let i=0;i<14;i++){const d=addDays(first,i);
+    const today=J.filter(m=>m.date===d&&live(m.biz)),late=i===0?J.filter(m=>m.date<d&&live(m.biz)):[];
+    if(today.length||late.length)add("etapes","etapes:"+d,at(d,H),today.length+late.length===1?(late.length?"En retard : ":"Aujourd'hui : ")+(today[0]||late[0]).titre:`${today.length?today.length+" étape"+(today.length>1?"s":"")+" aujourd'hui":""}${today.length&&late.length?" · ":""}${late.length?late.length+" en retard":""}`,names(today.concat(late).map(m=>m.titre)),"./#"+(bz((today[0]||late[0]).biz)||"accueil")+"--feuille");
+    const rel=Object.values(S.contacts).filter(c=>c.relance&&!["signe","perdu"].includes(c.etape)&&(i===0?c.relance<=d:c.relance===d));
+    if(rel.length)add("relances","relances:"+d,at(d,H,1),rel.length===1?"Relancer "+rel[0].nom+" aujourd'hui":rel.length+" relances aujourd'hui",names(rel.map(c=>c.nom+(c.entreprise?" ("+c.entreprise+")":""))),"./#"+(bz(rel[0].biz)||"accueil")+"--contacts");
+    const ach=rows("achats").filter(a=>(a.statut==="a_commander"||a.statut==="a_valider")&&a.date===d);if(ach.length)add("achats","achats:"+d,at(d,H,2),ach.length===1?"À commander : "+ach[0].article:ach.length+" achats à faire",names(ach.map(a=>a.article)),"./#"+(bz(ach[0].biz)||"accueil")+"--achats");
+    const mk=Object.values(S.marketing).filter(m=>m.statut==="prevu"&&m.date===d);if(mk.length)add("marketing","marketing:"+d,at(d,H,3),"Marketing : "+mk[0].titre+(mk.length>1?" (+"+(mk.length-1)+")":""),"Action prévue aujourd'hui.","./#"+(bz(mk[0].biz)||"accueil")+"--marketing");
+    const dow=toDate(d).getDay();
+    if(dow===1){const f=pref("focus");const ok=f.semaine===d&&(f.ids||[]).length;add("priorites","prio:"+d,at(d,H,4),ok?"Vos priorités de la semaine":"Choisissez vos 3 priorités",ok?names(f.ids.map(id=>(S.jalons[id]||{}).titre).filter(Boolean)):"La revue prend 10 minutes : on s'y met ?","./#accueil")}
+    if(dow===0)add("revue","revue:"+d,at(d,"18:00"),"Revue de la semaine","10 minutes pour faire le point et choisir vos 3 priorités.","./#accueil")}
+  Object.values(S.factures).filter(f=>f.type==="facture"&&f.statut==="envoye"&&f.echeance).forEach(f=>{const c=(S.contacts[f.client]||{}).nom||"";
+    add("factures","fac:"+f.id+":0",at(f.echeance,H,5),"Échéance de la facture "+f.numero,`${c} · ${eur2(facTotal(f))}`,"./#"+(bz(f.biz)||"accueil")+"--factures");
+    add("factures","fac:"+f.id+":3",at(addDays(f.echeance,3),H,5),"Facture "+f.numero+" impayée",`${c} · ${eur2(facTotal(f))} : une relance s'impose.`,"./#"+(bz(f.biz)||"accueil")+"--factures")});
+  Object.values(S.factures).filter(f=>f.type==="devis"&&f.statut==="envoye").forEach(f=>add("devis","devis:"+f.id,at(addDays(f.date,7),H,6),"Relancer le devis "+f.numero,((S.contacts[f.client]||{}).nom||"")+" n'a pas encore répondu.","./#"+(bz(f.biz)||"accueil")+"--factures"));
+  urssafItems(TODAY,addDays(TODAY,60)).forEach(x=>{const t=urssafText(x).replace(/&amp;/g,"&");[7,1].forEach(n=>add("urssaf","urssaf:"+x.b.id+":"+x.dl+":"+n,at(addDays(x.dl,-n),H,7),(n===1?"Demain : ":"Dans 7 jours : ")+(x.cfe?"CFE":x.impot?"déclaration de revenus":"déclaration URSSAF"),t,"./#"+(bz(x.b.id)||"accueil")+"--finances"))});
+  const tm=pref("timer");if(tm.start)add("chrono","chrono:"+tm.start,new Date(new Date(tm.start).getTime()+3*3600000),"Le chrono tourne toujours","Depuis 3 heures sur "+((S.biz[tm.biz]||{}).name||"un projet")+". Pensez à l'arrêter.","./#accueil");
+  return {kinds:NKINDS.map(x=>x.k),items:items.sort((a,b)=>a.send_at<b.send_at?-1:1).slice(0,150)}}
+if(window.QG&&window.QG.push)window.QG.push.plan=pushPlan;
+let pushT=0;const pushSoon=()=>{if(!(window.QG&&window.QG.push&&window.QG.push.on()))return;clearTimeout(pushT);pushT=setTimeout(()=>window.QG.push.sync(pushPlan()).catch(()=>{}),3000)};
+async function openNotifs(msg){const P=window.QG&&window.QG.push;if(!P)return;const st=await P.state();const pr=P.prefs();
+  $("#layer").innerHTML=`<div class="overlay" data-act="overlay"><div class="modal notifs" role="dialog" aria-modal="true" aria-label="Notifications"><h2>🔔 Notifications</h2>
+  <div class="planline ${st.k==="on"?"ok":st.k==="off"?"":"soon"}" style="margin:12px 0"><b>${st.k==="on"?"Activées":st.k==="off"?"Désactivées":"À préparer"}</b> · ${esc(st.m)}</div>
+  ${msg?`<div class="planline late" style="margin-bottom:12px">${esc(msg)}</div>`:""}
+  <div class="actions" style="margin-bottom:14px">${st.k==="compte"?`<button class="btn primary" data-act="sync">Connecter la synchronisation</button>`:st.k==="off"?`<button class="btn primary" data-act="push-on">Activer les notifications</button>`:st.k==="on"?`<button class="btn" data-act="push-test">M'envoyer un essai</button><button class="btn ghost" data-act="push-off">Couper sur cet appareil</button>`:""}</div>
+  <div class="field" style="max-width:220px;margin-bottom:10px"><label for="push-h">Heure des rappels du matin</label><input type="time" id="push-h" value="${esc(P.heure())}"></div>
+  <div class="nlist">${NKINDS.map(x=>`<label class="nk"><span class="ni">${x.ic}</span><span class="nt"><b>${x.t}</b><small>${x.d}</small></span><input type="checkbox" class="sw" data-k="${x.k}" ${pr[x.k]===false?"":"checked"}></label>`).join("")}</div>
+  <p class="help" style="margin-top:10px">Chaque appareil choisit ses notifications. Pour les dates : menu ⋯ › « Envoyer dans mon calendrier ».</p>
+  <div class="mfoot"><span></span><button class="btn ghost" data-act="close">Fermer</button></div></div></div>`;
+  const save=()=>{const p={};document.querySelectorAll(".nk .sw").forEach(c=>p[c.dataset.k]=c.checked);P.setPrefs(p,$("#push-h").value||"07:45").catch(e=>toast(e.message))};
+  document.querySelectorAll(".nk .sw").forEach(c=>c.addEventListener("change",save));$("#push-h").addEventListener("change",save)}
 function openSync(msg){const Q=window.QG&&window.QG.sync;if(!Q)return;const st=Q.status();const ago=st.last?Math.max(0,Math.round((Date.now()-new Date(st.last))/60000)):null;
   $("#layer").innerHTML=`<div class="overlay" data-act="overlay"><form class="modal" id="syncf" role="dialog" aria-modal="true" aria-label="Synchronisation" style="max-width:520px"><h2>🔄 Synchronisation</h2>
   ${st.connected?`<p class="sub">Connecté en tant que <b>${esc(st.email)}</b>. Vos données sont les mêmes sur tous vos appareils connectés à ce compte.</p>
@@ -1127,13 +1184,14 @@ function openSheet(){
   $("#layer").innerHTML=`<div class="sheet-wrap" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-label="Menu"><div class="grab"></div><h2>Menu</h2>
   <button class="opt" data-act="new" data-col="biz" style="color:var(--accent)">＋ Nouvel univers ou business</button>
   ${window.QG&&window.QG.sync?(()=>{const st=window.QG.sync.status();return `<button class="opt" data-act="sync">🔄 Synchronisation téléphone ↔ ordinateur<small>${st.connected?(st.error?"⚠ "+esc(st.error):"activée"):"à activer"}</small></button>`})():""}
+  ${window.QG&&window.QG.push?`<button class="opt" data-act="notifs">🔔 Notifications<small>${window.QG.push.on()?"activées":"à activer"}</small></button>`:""}
   <button class="opt" data-act="review">✦ Revue de la semaine<small>3 priorités</small></button>
   <button class="opt" data-act="ics">📅 Envoyer dans mon calendrier<small>fichier .ics</small></button>
   <div class="sep"></div><h2 style="margin-top:12px">Sauvegarde</h2>
   <button class="opt" data-act="export">⤓ Exporter toutes les données<small>fichier .json</small></button>
   <label class="opt" style="cursor:pointer">⤒ Restaurer depuis un fichier<small>remplace les éléments du même nom</small><input type="file" id="importfile" accept="application/json,.json" hidden></label></div></div>`;
   const f=$("#layer .opt");if(f)f.focus()}
-function render(){renderChrome();const m=$("#main");const a=document.activeElement;const keep=a&&a.id&&m.contains(a)?{id:a.id,s:a.selectionStart}:null;
+function render(){renderChrome();pushSoon();const m=$("#main");const a=document.activeElement;const keep=a&&a.id&&m.contains(a)?{id:a.id,s:a.selectionStart}:null;
   m.innerHTML=(VIEWS[UI.view]||vTableau)();
   if(keep){const el=document.getElementById(keep.id);if(el){el.focus();try{if(keep.s!=null)el.setSelectionRange(keep.s,keep.s)}catch(e){}}}}
 function route(){const h=decodeURIComponent(location.hash.slice(1));const [a,b]=h.split("--");UI.q="";
@@ -1209,6 +1267,10 @@ document.addEventListener("click",async e=>{const el=e.target.closest("[data-act
     case "quick":openQuick();break;
     case "review":openReview();break;
     case "sync":openSync();break;
+    case "notifs":openNotifs();break;
+    case "push-on":el.disabled=true;window.QG.push.enable().then(()=>{toast("Notifications activées");openNotifs()}).catch(e=>openNotifs(e.message));break;
+    case "push-off":window.QG.push.disable().then(()=>{toast("Notifications coupées sur cet appareil");openNotifs()});break;
+    case "push-test":window.QG.push.test().then(()=>toast("Essai envoyé : il arrive dans la minute")).catch(e=>toast("Essai impossible : "+e.message));break;
     case "sync-now":window.QG.sync.run();break;
     case "sync-off":window.QG.sync.disconnect();openSync();toast("Déconnecté : les données restent sur cet appareil");break;
     case "timer":timerToggle();break;

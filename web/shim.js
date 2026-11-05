@@ -65,8 +65,8 @@ function collRef(coll){
 const db=Object.freeze({collection:collRef,doc:p=>{const i=p.lastIndexOf("/");return docRef(p.slice(0,i),p.slice(i+1))}});
 
 /* ---------- synchronisation (Supabase) ---------- */
-/* Base dédiée à QG Business. Table qg_docs (voir README) protégée par compte : chacun ne voit que ses données. */
-const SYNC_DEFAULT={url:"",key:""};
+/* Même projet Supabase que Jobello (même compte). Table qg_docs (voir README) protégée par compte : chacun ne voit que ses données. */
+const SYNC_DEFAULT={url:"https://vvxkkqcmjrwytagbxdfg.supabase.co",key:"sb_publishable_A-kJQIoJXxdXmjHF8iM40g_RP6myhMo"};
 const SK="qg_sync";
 const getCfg=()=>{try{return Object.assign({},SYNC_DEFAULT,JSON.parse(localStorage.getItem(SK)||"{}"))}catch{return {...SYNC_DEFAULT}}};
 const setCfg=c=>{try{localStorage.setItem(SK,JSON.stringify(c))}catch{}};
@@ -109,6 +109,42 @@ const Sync={st:{last:"",error:"",busy:false},listeners:new Set(),timer:null,
     catch(e){this.st.error=e.message||"Synchronisation impossible"}
     finally{this.st.busy=false;this.emit()}}};
 window.QG.sync=Sync;
+
+/* ---------- notifications (même serveur que Jobello, app = "qg") ---------- */
+const PUSH_APP="qg";
+const lsGet=(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const pushOK="serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;
+const unb64=t=>Uint8Array.from(atob(t.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((t.length+3)%4)),c=>c.charCodeAt(0));
+const b64=k=>btoa(String.fromCharCode(...new Uint8Array(k))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const appareil=()=>isIOS?(/ipad/i.test(navigator.userAgent)?"iPad":"iPhone"):/android/i.test(navigator.userAgent)?"Android":/mac/i.test(navigator.platform)?"Mac":"Ordinateur";
+const curSub=async()=>{if(!pushOK)return null;const r=await navigator.serviceWorker.getRegistration();return r?r.pushManager.getSubscription():null};
+let lastPush="";
+const Push={
+  prefs:()=>lsGet("qg_push_prefs",{}),heure:()=>lsGet("qg_push_heure","07:45"),on:()=>!!lsGet("qg_push_on",false),
+  rpc:(fn,args)=>Sync.rest("rpc/"+fn,{method:"POST",body:JSON.stringify(args||{})}),
+  async state(){if(!Sync.status().connected)return {k:"compte",m:"Connectez d'abord la synchronisation (même compte que Jobello) : les rappels partent du serveur."};
+    if(isIOS&&!standalone)return {k:"installer",m:"Sur iPhone, les notifications marchent quand QG Business est installé : dans Safari, Partager puis « Sur l'écran d'accueil », puis ouvrez l'app depuis son icône."};
+    if(!pushOK)return {k:"non",m:"Ce navigateur ne sait pas recevoir de notifications."};
+    if(Notification.permission==="denied")return {k:"refuse",m:isIOS?"Notifications bloquées : Réglages de l'iPhone › Notifications › QG Business › Autoriser.":"Notifications bloquées pour ce site dans les réglages du navigateur."};
+    const sub=await curSub();if(sub&&this.on()&&Notification.permission==="granted")return {k:"on",m:"Activées sur cet appareil."};
+    return {k:"off",m:"Activez-les pour être prévenu au bon moment, même app fermée."}},
+  async register(sub){await this.rpc("push_register",{p_app:PUSH_APP,p_endpoint:sub.endpoint,p_sub:sub.toJSON(),p_prefs:this.prefs(),p_appareil:appareil()})},
+  async enable(){if(!Sync.status().connected)throw new Error("Connectez d'abord la synchronisation.");
+    const perm=await Notification.requestPermission();if(perm!=="granted")throw new Error("Autorisez les notifications quand l'appareil le demande.");
+    const key=await this.rpc("push_public_key");if(!key)throw new Error("Le serveur des notifications ne répond pas encore.");
+    const reg=await navigator.serviceWorker.ready;let sub=await reg.pushManager.getSubscription();
+    if(sub){const k=sub.options&&sub.options.applicationServerKey;if(k&&b64(k)!==key){await sub.unsubscribe();sub=null}}
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:unb64(key)});
+    await this.register(sub);lsSet("qg_push_on",true);lastPush="";if(this.plan)await this.sync(this.plan())},
+  async disable(){const sub=await curSub();lsSet("qg_push_on",false);if(sub){try{await Sync.rest("push_subs?endpoint=eq."+encodeURIComponent(sub.endpoint),{method:"DELETE"})}catch{}try{await sub.unsubscribe()}catch{}}},
+  async setPrefs(p,heure){lsSet("qg_push_prefs",p);if(heure)lsSet("qg_push_heure",heure);const sub=await curSub();if(sub&&this.on())await this.register(sub);lastPush="";if(this.plan)await this.sync(this.plan())},
+  test(){return this.rpc("push_test",{p_app:PUSH_APP,p_title:"QG Business",p_body:"Les notifications marchent sur cet appareil 🎉"})},
+  async sync(r){if(!r||!this.on()||!Sync.status().connected||navigator.onLine===false)return;const h=JSON.stringify(r.items);if(h===lastPush)return;
+    await this.rpc("push_sync",{p_app:PUSH_APP,p_kinds:r.kinds,p_items:r.items});lastPush=h}};
+window.QG.push=Push;
 setInterval(()=>{if(document.visibilityState==="visible")Sync.run()},60000);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")Sync.run()});
 window.addEventListener("online",()=>Sync.run());
@@ -227,6 +263,7 @@ window.claude=Object.freeze({use:name=>window.QG.ready.then(()=>caps[name]||null
 
 /* ---------- appli installable ---------- */
 if("serviceWorker" in navigator){let had=!!navigator.serviceWorker.controller,done=false;
+  navigator.serviceWorker.addEventListener("message",e=>{const d=e.data||{};if(d.type==="qg-ouvrir"&&d.url){try{const u=new URL(d.url,location.href);if(u.origin===location.origin)location.href=u.href}catch(_){}}});
   navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=true;location.reload()}had=true});
   navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{const up=()=>r.update().catch(()=>{});document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")up()})}).catch(()=>{})}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
