@@ -22,14 +22,15 @@
   "createdAt": "2026-11-04T20:30:00Z",
   "debut": "2026-12-01",
   "forme": "Micro-entreprise (à immatriculer)",
-  "name": "DSG Conseil",
+  "name": "Secrétariat IA",
   "notes": "Offres : Essentiel 290 € + 89 €/mois, Pro 490 € + 149 €/mois, Complète 990 € + 249 €/mois. Démarrage visé le 1er décembre 2026.",
   "objectif": "",
   "order": 0,
   "phase": "creation",
   "statut": "actif",
   "taux": "",
-  "updatedAt": "2026-11-04T20:20:00Z"
+  "updatedAt": "2026-11-04T20:20:00Z",
+  "ei": "Tullio Disegni EI — OFFICINA DISEGNI"
  },
  "biz/biz-repz": {
   "activite": "",
