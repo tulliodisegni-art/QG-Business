@@ -9,8 +9,8 @@ window.QG={hasKey:()=>!!getKey(),setKey:k=>{try{k?localStorage.setItem(KEY,k.tri
 
 /* ---------- IndexedDB ---------- */
 const idb=new Promise((ok,ko)=>{
-  const r=indexedDB.open("qgbusiness",1);
-  r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains("docs"))d.createObjectStore("docs");if(!d.objectStoreNames.contains("blobs"))d.createObjectStore("blobs")};
+  const r=indexedDB.open("qgbusiness",2);
+  r.onupgradeneeded=()=>{const d=r.result;["docs","blobs","meta"].forEach(n=>{if(!d.objectStoreNames.contains(n))d.createObjectStore(n)})};
   r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error);
 });
 const tx=(store,mode,fn)=>idb.then(d=>new Promise((ok,ko)=>{const t=d.transaction(store,mode);const res=fn(t.objectStore(store));t.oncomplete=()=>ok(res&&"result" in res?res.result:undefined);t.onerror=()=>ko(t.error);t.onabort=()=>ko(t.error)}));
@@ -34,11 +34,12 @@ function notify(key){
     for(const fn of subs.get(key)||[])setTimeout(()=>fn(snapDoc(m,key)));
   });
 }
-async function write(key,val){
+async function write(key,val,remoteTs){
   const m=await loadAll();
   if(val===undefined){m.delete(key);await tx("docs","readwrite",s=>s.delete(key))}
   else{val=clone(val);m.set(key,val);await tx("docs","readwrite",s=>s.put(val,key))}
-  notify(key);
+  const ts=remoteTs||Date.now();await tx("meta","readwrite",s=>{s.put(ts,"ts:"+key);if(remoteTs)s.delete("out:"+key);else s.put(ts,"out:"+key)});
+  notify(key);if(!remoteTs)Sync.soon();
 }
 function deepMerge(a,b){const o=isObj(a)?{...a}:{};for(const k in b)o[k]=isObj(b[k])&&isObj(o[k])?deepMerge(o[k],b[k]):b[k];return o}
 function sub(key,fn,init){let set=subs.get(key);if(!set)subs.set(key,set=new Set());set.add(fn);loadAll().then(m=>{if(set.has(fn))fn(init(m))});return ()=>set.delete(fn)}
@@ -62,6 +63,55 @@ function collRef(coll){
     onSnapshot:(fn,err)=>sub(coll,fn,m=>snapColl(m,coll))};
 }
 const db=Object.freeze({collection:collRef,doc:p=>{const i=p.lastIndexOf("/");return docRef(p.slice(0,i),p.slice(i+1))}});
+
+/* ---------- synchronisation (Supabase) ---------- */
+/* Base dédiée à QG Business. Table qg_docs (voir README) protégée par compte : chacun ne voit que ses données. */
+const SYNC_DEFAULT={url:"",key:""};
+const SK="qg_sync";
+const getCfg=()=>{try{return Object.assign({},SYNC_DEFAULT,JSON.parse(localStorage.getItem(SK)||"{}"))}catch{return {...SYNC_DEFAULT}}};
+const setCfg=c=>{try{localStorage.setItem(SK,JSON.stringify(c))}catch{}};
+const metaGet=k=>tx("meta","readonly",s=>s.get(k));
+const metaAll=prefix=>idb.then(d=>new Promise((ok,ko)=>{const out=[],t=d.transaction("meta","readonly"),c=t.objectStore("meta").openCursor();c.onsuccess=()=>{const x=c.result;if(x){if(String(x.key).startsWith(prefix))out.push([x.key,x.value]);x.continue()}else ok(out)};c.onerror=()=>ko(c.error)}));
+const Sync={st:{last:"",error:"",busy:false},listeners:new Set(),timer:null,
+  cfg:getCfg,
+  on(fn){this.listeners.add(fn);return ()=>this.listeners.delete(fn)},
+  emit(){const s2=this.status();this.listeners.forEach(f=>{try{f(s2)}catch{}})},
+  status(){const c=getCfg();return {configured:!!(c.url&&c.key),connected:!!(c.url&&c.key&&c.refresh),email:c.email||"",url:c.url||"",hasDefault:!!SYNC_DEFAULT.url,last:this.st.last,error:this.st.error,busy:this.st.busy}},
+  async auth(path,body){const c=getCfg();const r=await fetch(c.url.replace(/\/$/,"")+"/auth/v1/"+path,{method:"POST",headers:{"content-type":"application/json",apikey:c.key},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));
+    if(!r.ok){const m=j.error_description||j.msg||j.message||("erreur "+r.status);throw new Error(/invalid login/i.test(m)?"Email ou mot de passe incorrect.":/already registered/i.test(m)?"Ce compte existe déjà : utilisez « Se connecter ».":/not confirmed/i.test(m)?"Confirmez d'abord votre email (lien reçu), puis connectez-vous.":m)}return j},
+  keep(j){const c=getCfg();c.access=j.access_token;c.refresh=j.refresh_token;c.exp=Date.now()+(j.expires_in||3600)*1000-60000;c.uid=(j.user&&j.user.id)||c.uid;if(j.user&&j.user.email)c.email=j.user.email;setCfg(c)},
+  async token(){const c=getCfg();if(!c.refresh)throw new Error("Non connecté");if(c.access&&c.exp>Date.now())return c.access;const j=await this.auth("token?grant_type=refresh_token",{refresh_token:c.refresh});this.keep(j);return j.access_token},
+  async connect({url,key,email,password,create}){const c=getCfg();if(url)c.url=url.trim().replace(/\/$/,"");if(key)c.key=key.trim();c.email=email.trim();setCfg(c);
+    if(!c.url||!c.key)throw new Error("Il manque l'adresse ou la clé du projet Supabase.");
+    let j;if(create){j=await this.auth("signup",{email:c.email,password});if(!j.access_token)throw new Error("Compte créé : confirmez votre email (lien reçu), puis revenez ici et cliquez sur « Se connecter ».")}
+    else j=await this.auth("token?grant_type=password",{email:c.email,password});
+    this.keep(j);const m=await loadAll();await tx("meta","readwrite",s=>{for(const k of m.keys())s.put(1,"out0:"+k)});localStorage.removeItem("qg_pull");await this.run();return this.status()},
+  disconnect(){const c=getCfg();delete c.access;delete c.refresh;delete c.uid;setCfg(c);this.emit()},
+  soon(){clearTimeout(this.timer);if(this.status().connected)this.timer=setTimeout(()=>this.run(),1500)},
+  async rest(path,opt={}){const c=getCfg();const t=await this.token();const r=await fetch(c.url+"/rest/v1/"+path,{...opt,headers:{"content-type":"application/json",apikey:c.key,authorization:"Bearer "+t,...(opt.headers||{})}});
+    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(/qg_docs/.test(j.message||"")&&/exist|find/i.test(j.message||"")?"La table qg_docs n'existe pas encore : collez le script SQL dans Supabase.":(j.message||("erreur "+r.status)))}return r.status===204?null:r.json().catch(()=>null)},
+  async run(){if(this.st.busy||!this.status().connected||navigator.onLine===false)return;this.st.busy=true;this.emit();
+    try{const c=getCfg();const m=await loadAll();
+      // 1. récupérer les changements des autres appareils
+      let since=localStorage.getItem("qg_pull")||"1970-01-01T00:00:00Z";
+      for(let page=0;page<50;page++){const rows=await this.rest("qg_docs?select=col,id,data,deleted,ts,updated_at&order=updated_at.asc&limit=1000&updated_at=gt."+encodeURIComponent(since));if(!rows||!rows.length)break;
+        for(const r of rows){const key=r.col+"/"+r.id;const lt=(await metaGet("ts:"+key))||0;const local=m.has(key);
+          if(Number(r.ts)>lt||(!local&&!r.deleted&&!lt)){await write(key,r.deleted?undefined:r.data,Math.max(1,Number(r.ts)||1));await tx("meta","readwrite",s=>s.delete("out0:"+key))}
+          since=r.updated_at}
+        localStorage.setItem("qg_pull",since);if(rows.length<1000)break}
+      // 2. envoyer les changements de cet appareil
+      const out=(await metaAll("out:")).map(([k,v])=>[String(k).slice(4),v]).concat((await metaAll("out0:")).map(([k])=>[String(k).slice(5),0]));
+      for(let i=0;i<out.length;i+=200){const part=out.slice(i,i+200);const rows=[];
+        for(const [key,ts0] of part){const j=key.lastIndexOf("/");const ts=(await metaGet("ts:"+key))||ts0||1;const v=m.get(key);rows.push({user_id:c.uid,col:key.slice(0,j),id:key.slice(j+1),data:v===undefined?null:v,deleted:v===undefined,ts})}
+        if(rows.length)await this.rest("qg_docs?on_conflict=user_id,col,id",{method:"POST",headers:{prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(rows)});
+        await tx("meta","readwrite",s=>{for(const [key] of part){s.delete("out:"+key);s.delete("out0:"+key)}})}
+      this.st.last=new Date().toISOString();this.st.error=""}
+    catch(e){this.st.error=e.message||"Synchronisation impossible"}
+    finally{this.st.busy=false;this.emit()}}};
+window.QG.sync=Sync;
+setInterval(()=>{if(document.visibilityState==="visible")Sync.run()},60000);
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")Sync.run()});
+window.addEventListener("online",()=>Sync.run());
 
 /* ---------- downloads ---------- */
 const downloads=Object.freeze({save:async({filename,data})=>{
@@ -172,6 +222,7 @@ window.QG.ready=(async()=>{try{const m=await loadAll();if(m.size||localStorage.g
 
 /* ---------- window.claude ---------- */
 const caps={db,downloads,sample};
+window.QG.ready.then(()=>setTimeout(()=>Sync.run(),800));
 window.claude=Object.freeze({use:name=>window.QG.ready.then(()=>caps[name]||null)});
 
 /* ---------- appli installable ---------- */

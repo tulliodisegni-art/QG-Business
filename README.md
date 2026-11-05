@@ -2,7 +2,8 @@
 
 Logiciel de gestion de tous mes projets et business : tableau de bord, univers et projets, feuille de route, finances, achats, clients, marketing, améliorations des apps et documents.
 
-- Les données restent sur l'appareil (IndexedDB). Au premier lancement, l'app reprend les données de départ de `web/seed.json`.
+- Les données sont gardées sur l'appareil (IndexedDB) et, une fois la synchronisation activée (menu ⋯ → Synchronisation), recopiées dans une base Supabase dédiée : mêmes données sur le téléphone et l'ordinateur. Au premier lancement, l'app reprend les données de départ de `web/seed.json`.
+- Supabase : coller une fois `supabase/qg_docs.sql` dans SQL Editor. Chaque compte ne voit que ses données (RLS).
 - Projets → bouton du haut → Sauvegarde : exporter / restaurer toutes les données dans un fichier.
 - « Préparer avec Claude » (onglet Apps) passe par la fonction IA partagée avec les autres apps.
 
