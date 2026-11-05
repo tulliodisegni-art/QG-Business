@@ -201,7 +201,7 @@ async function callServer(input,o){
     try{r=await send(1024,.75)}catch(e2){if(o.signal&&o.signal.aborted)throw err("cancelled");throw err("network",navigator.onLine===false?"Pas de connexion. Vérifie internet et réessaie.":"Le serveur n'a pas répondu. Réessaie dans un instant.")}}
   const out=await r.json().catch(()=>({}));
   if(!r.ok){const st=out.status||r.status;if(st===429)throw err("rate_limited");if(r.status===400)throw err("prompt_too_large");throw err("api_error","Claude n'a pas pu répondre ("+st+"). Réessaie dans un instant.")}
-  const text=String(out.text||"");o.onText&&o.onText({text,delta:text});
+  const text=String(out.text||"");if(!text.trim())throw err("api_error","Claude n'a rien répondu. Réessaie dans un instant.");o.onText&&o.onText({text,delta:text});
   return {text,truncated:false,modelApplied:"serveur"};
 }
 async function call(input,o={}){

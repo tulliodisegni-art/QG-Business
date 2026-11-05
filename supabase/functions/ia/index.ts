@@ -24,7 +24,14 @@ async function gemini(key: string, prompt: string, images: string[], web: boolea
       }),
     });
     const res = await r.json();
-    if (r.ok) return (res.candidates?.[0]?.content?.parts || []).map((p: any) => p.text || "").join("");
+    if (r.ok) {
+      const c = res.candidates?.[0];
+      const text = (c?.content?.parts || []).filter((p: any) => !p.thought).map((p: any) => p.text || "").join("");
+      console.log(JSON.stringify({ model, prompt: prompt.length, text: text.length, fin: c?.finishReason, block: res.promptFeedback?.blockReason }));
+      if (text.trim()) return text;
+      last = `réponse vide (${c?.finishReason || res.promptFeedback?.blockReason || "?"})`;
+      continue;
+    }
     last = res?.error?.message || `erreur ${r.status}`;
     if (![400, 404, 429, 500, 503].includes(r.status)) break;
   }
