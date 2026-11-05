@@ -341,6 +341,48 @@ a.lk:hover{text-decoration:underline}
 .tabbar .tl{max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tabbar a[aria-current="page"] .ti{box-shadow:0 0 0 2px rgba(255,255,255,.85)}
 .tabbar a[aria-current="page"] .ti.home{box-shadow:none}
+
+/* Capture rapide + planning */
+.fab{all:unset;box-sizing:border-box;cursor:pointer;position:fixed;z-index:41;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(98px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:20px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 12px 28px rgba(242,103,46,.4)}
+.fab svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+.fab:hover{filter:brightness(1.06)}.fab:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
+@media (min-width:900px){.fab{bottom:28px;right:32px}}
+.quick textarea{font-size:17px;padding:14px 16px;border-radius:16px}
+.qtypes{margin-top:12px;flex-wrap:wrap;display:flex;gap:6px}
+.qtypes button[aria-pressed="true"]{background:var(--accent);color:#fff}
+#qprev{font-weight:600;color:var(--accent)}
+.planline{margin:-4px 0 12px;font-size:13.5px;color:var(--muted);background:var(--surface-2);border-radius:12px;padding:8px 12px}
+.planline.ok b{color:var(--ok)}.planline.soon b{color:var(--warn)}.planline.late b{color:var(--late)}
+.lkbtn{all:unset;cursor:pointer;color:var(--accent);font-weight:600;text-decoration:underline}
+.subt{list-style:none;margin:8px 0 2px;padding:0;display:flex;flex-direction:column;gap:4px}
+.subt label{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:var(--muted);cursor:pointer}
+.subt input{accent-color:var(--accent);margin-top:3px}
+.subt input:checked+span{text-decoration:line-through;opacity:.7}
+.sheet .opt.tpl{align-items:flex-start;text-align:left;padding-block:12px}
+
+/* Revue + focus */
+.focus{margin-bottom:18px;border:2px solid var(--accent-soft)}
+.focus.empty-f{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.fitems{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:6px}
+.fitem{display:flex;gap:12px;align-items:flex-start;background:var(--surface-2);border-radius:16px;padding:12px 14px;border-left:4px solid var(--pc)}
+.fitem .t{all:unset;cursor:pointer;font-weight:600;overflow-wrap:anywhere}
+.fitem .meta{font-size:12.5px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap;margin-top:3px}
+.fitem.done .t{text-decoration:line-through;color:var(--muted)}
+.fchk{all:unset;cursor:pointer;flex:none;width:24px;height:24px;border-radius:8px;border:2px solid var(--pc);display:grid;place-items:center;color:#fff;font-weight:800;font-size:14px}
+.fitem.done .fchk{background:var(--pc)}
+.fchk:focus-visible{outline:2px solid var(--accent)}
+@media (max-width:900px){.fitems{grid-template-columns:minmax(0,1fr)}}
+.review{max-width:720px}
+.review h3{font:600 15px var(--f-display);margin:20px 0 6px;display:flex;align-items:center;gap:8px}
+.rl{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.rcand{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.rc{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;background:var(--surface-2);cursor:pointer;border-left:4px solid var(--pc)}
+.rc input{accent-color:var(--accent);margin-top:3px}
+.rc b{display:block;font-weight:600;font-size:14px}.rc small{color:var(--muted);font-size:12.5px}
+.rc:has(input:checked){background:var(--accent-soft)}
+@media (max-width:640px){.rcand{grid-template-columns:minmax(0,1fr)}}
+.arow{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.qa{display:flex;gap:2px}.qa .btn{padding:4px 8px;font-size:12px}
 </style>
 
 <div class="shell">
@@ -356,6 +398,7 @@ a.lk:hover{text-decoration:underline}
   <main id="main"></main>
 </div>
 <nav class="tabbar" id="tabbar" aria-label="Onglets principaux"></nav>
+<button class="fab" id="fab" data-act="quick" aria-label="Capture rapide : ajouter une tâche, une dépense, une relance" title="Capture rapide"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
 <div id="layer"></div>
 
 <script>
@@ -388,6 +431,7 @@ const SCHEMA={
     {k:"statut",l:"Statut",t:"sel",o:BIZ_ST,def:"actif"},
     {k:"forme",l:"Structure juridique",t:"text",ph:"Ex. Micro-entreprise"},
     {k:"debut",l:"Date de démarrage",t:"date"},
+    {k:"cible",l:"Date cible (lancement, sortie…)",t:"date",help:"Sert au planning automatique : l'app vous dit si vous êtes dans les temps."},
     {k:"budget",l:"Budget de lancement (€)",t:"num"},
     {k:"taux",l:"Taux de cotisations (%)",t:"num",help:"Pour estimer les charges sur le chiffre d'affaires (à vérifier sur urssaf.fr)."},
     {k:"color",l:"Couleur",t:"color",full:1},
@@ -395,7 +439,10 @@ const SCHEMA={
   jalons:{one:"étape",fields:[
     {k:"titre",l:"Étape",t:"text",req:1,full:1},{k:"biz",l:"Business",t:"biz",req:1},
     {k:"date",l:"Date cible",t:"date"},{k:"statut",l:"Statut",t:"sel",o:MS_ST,def:"a_faire"},
-    {k:"phase",l:"Phase",t:"sel",o:PHASES,def:""},{k:"note",l:"Note",t:"area",full:1}]},
+    {k:"duree",l:"Durée estimée (jours)",t:"num",help:"Avec une durée, la date se calcule toute seule (bouton « Planifier »)."},{k:"apres",l:"Commence après l'étape",t:"dep",help:"Par défaut : l'étape précédente du modèle."},
+    {k:"phase",l:"Phase",t:"sel",o:PHASES,def:""},
+    {k:"taches",l:"Checklist",t:"area",full:1,rows:4,ph:"Une sous-tâche par ligne",help:"Une ligne par sous-tâche. Cochez-les directement dans la feuille de route."},
+    {k:"note",l:"Note",t:"area",full:1}]},
   ops:{one:"opération",fields:[
     {k:"type",l:"Type",t:"sel",o:[["depense","Dépense"],["recette","Recette"]],def:"depense"},{k:"date",l:"Date",t:"date",req:1,today:1},
     {k:"libelle",l:"Libellé",t:"text",req:1,full:1},{k:"biz",l:"Business",t:"biz",req:1},
@@ -432,6 +479,7 @@ const SCHEMA={
     {k:"biz",l:"Business",t:"biz"},{k:"type",l:"Type",t:"sel",o:DOC_TYPE.map(x=>[x,x]),def:"Autre"},
     {k:"note",l:"Note",t:"area",full:1}]}
 };
+SCHEMA.prefs={one:"réglage",fields:[]};
 const COLS=Object.keys(SCHEMA);
 const S={ready:{}};COLS.forEach(c=>S[c]={});
 const UI={proj:"",amType:"",amShowDone:false,view:"tableau",biz:"",year:new Date().getFullYear(),q:"",opType:"",msShowDone:false,ctType:"",ctStep:"",achShowDone:false};
@@ -472,6 +520,117 @@ function dueChip(d,done){if(!d)return "";if(done)return `<span class="chip">${fm
   if(x<0)return `<span class="chip late">${fmt(d)} · ${-x} j de retard</span>`;if(x===0)return `<span class="chip soon">Aujourd'hui</span>`;if(x<=14)return `<span class="chip soon">${fmt(d)}</span>`;return `<span class="chip">${fmt(d)}</span>`}
 const loading=()=>!offline&&COLS.some(c=>!S.ready[c]);
 
+/* ================= Planning ================= */
+const byOrd=(a,b)=>(a.ordre!=null&&b.ordre!=null?a.ordre-b.ordre:(a.ordre!=null)-(b.ordre!=null)?(a.ordre!=null?-1:1):0)||((a.date||"9")<(b.date||"9")?-1:(a.date||"9")>(b.date||"9")?1:0);
+function predOf(m){if(m.apres==="-")return null;if(m.apres&&S.jalons[m.apres]&&m.apres!==m.id)return S.jalons[m.apres];
+  if(m.ordre==null||m.ordre==="")return null;let best=null;Object.values(S.jalons).forEach(x=>{if(x.biz===m.biz&&x.id!==m.id&&x.ordre!=null&&x.ordre!==""&&x.ordre<m.ordre&&(!best||x.ordre>best.ordre))best=x});return best}
+const waitingOn=m=>{if(m.statut==="fait")return null;const p=predOf(m);return p&&p.statut!=="fait"?p:null};
+const parseTasks=t=>String(t||"").split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const ok=/^\[x\]/i.test(l);return {ok,t:l.replace(/^\[( |x)\]\s*/i,"")}});
+const tasksStr=a=>a.map(x=>(x.ok?"[x] ":"[ ] ")+x.t).join("\n");
+function computePlan(bid){const ms=Object.values(S.jalons).filter(m=>m.biz===bid).sort(byOrd);const E={};
+  const dur=m=>num(m.duree);
+  for(let pass=0;pass<ms.length+1;pass++){let ch=false;for(const m of ms){let v;
+    if(m.statut==="fait")v=m.date||TODAY;
+    else if(dur(m)>0){const p=predOf(m);let st=TODAY;if(p){const pe=E[p.id]||p.date||TODAY;if(pe>st)st=pe}v=addDays(st,dur(m))}
+    else v=m.date||"";
+    if(E[m.id]!==v){E[m.id]=v;ch=true}}if(!ch)break}
+  const open=ms.filter(m=>m.statut!=="fait");const fin=open.map(m=>E[m.id]).filter(Boolean).sort().pop()||"";
+  const b=S.biz[bid]||{};return {E,fin,cible:b.cible||"",marge:b.cible&&fin?diff(b.cible,fin):null}}
+async function applyPlan(bid,quiet){const {E,fin,marge}=computePlan(bid);let n=0;const now=new Date().toISOString();
+  for(const m of Object.values(S.jalons).filter(m=>m.biz===bid&&m.statut!=="fait"&&num(m.duree)>0)){if(E[m.id]&&E[m.id]!==m.date){await updDoc("jalons",m.id,{date:E[m.id],updatedAt:now});n++}}
+  if(!quiet)toast(n?`${n} date${n>1?"s":""} recalculée${n>1?"s":""}${marge!=null?(marge>=0?` · ${marge} j de marge`:` · ${-marge} j de retard prévu`):""}`:"Le planning est déjà à jour")}
+const TEMPLATES={
+  micro:{n:"Lancer une micro-entreprise",d:"Immatriculation, banque, assurance, factures : tout ce qu'il faut avant le premier client.",s:[
+    ["Vérifier le nom commercial (INPI, Google, réseaux)",2,"etude","Recherche sur data.inpi.fr\nVérifier le nom de domaine\nVérifier Instagram / Facebook"],
+    ["Immatriculer la micro-entreprise sur le guichet unique (INPI)",3,"creation","Se connecter avec l'Identité Numérique La Poste\nChoisir l'activité (prestation de services)\nOption versement libératoire : oui ou non\nDéclarer la date de début d'activité\nTélécharger le récépissé"],
+    ["Recevoir le SIRET et l'attestation INSEE",10,"creation","Vérifier le courrier INSEE\nEnregistrer l'avis de situation SIRENE"],
+    ["Créer l'espace autoentrepreneur.urssaf.fr",1,"creation","Choisir déclaration mensuelle ou trimestrielle\nNoter les dates de déclaration"],
+    ["Ouvrir un compte bancaire dédié",5,"creation","Comparer 2 ou 3 banques en ligne\nEnvoyer le SIRET\nCommander la carte"],
+    ["Souscrire une assurance RC Pro",4,"creation","Demander 2 devis\nVérifier la couverture des conseils et du paramétrage"],
+    ["Préparer devis, factures et CGV",2,"lancement","Modèle de devis\nModèle de facture avec mentions obligatoires\nCGV et contrat d'abonnement"],
+    ["Démarrer l'activité",1,"lancement",""]]},
+  client:{n:"Signer et installer un client DSG",d:"De la visite jusqu'à la mise en service et au bilan à 30 jours.",s:[
+    ["Visite de découverte chez l'artisan",1,"lancement","Noter le volume d'appels manqués\nNoter les horaires et l'agenda utilisé"],
+    ["Démo gratuite de 14 jours",14,"lancement","Paramétrer l'agent de démo\nPoint à mi-parcours (J+7)"],
+    ["Envoyer le devis et signer",3,"lancement","Choisir la formule (Essentiel, Pro, Complète)\nFaire signer le contrat et le mandat de prélèvement"],
+    ["Paramétrer l'agent téléphonique",3,"lancement","Script d'accueil\nTransfert d'appel\nConnexion agenda / SMS"],
+    ["Former l'artisan",1,"lancement",""],
+    ["Mise en service",1,"lancement",""],
+    ["Facturer l'installation et lancer l'abonnement",1,"croissance",""],
+    ["Bilan à 30 jours et demande d'avis",30,"croissance","Appels traités\nSatisfaction\nDemander un avis Google et un parrainage"]]},
+  livre:{n:"Sortir un livre de luxe",d:"De la recherche aux précommandes et à l'impression.",s:[
+    ["Recherche et plan du livre",30,"etude","Chapitres\nSources et archives"],
+    ["Accord de la marque et accès aux archives",30,"etude",""],
+    ["Droits des photos",30,"creation","Lister les photos\nDemander les devis aux agences\nSigner les licences"],
+    ["Rédaction",60,"creation",""],
+    ["Maquette et direction artistique",30,"creation",""],
+    ["Relecture et vérification des faits",15,"creation",""],
+    ["Devis imprimeurs et choix du papier",15,"lancement","3 devis minimum\nÉpreuves couleur"],
+    ["Ouvrir les précommandes",30,"lancement","Page de vente\nCampagne auprès des collectionneurs"],
+    ["Impression et livraison",45,"lancement",""],
+    ["Lancement et presse",7,"croissance",""]]},
+  app:{n:"Lancer une app",d:"Du cahier des charges aux premiers retours utilisateurs.",s:[
+    ["Cahier des charges",3,"etude",""],["Maquettes",5,"etude",""],["Développement de la V1",21,"creation",""],
+    ["Tests sur iPhone et Android",7,"creation",""],["Mise en ligne",2,"lancement",""],["Communication de lancement",7,"lancement",""],["Recueillir les retours utilisateurs",14,"croissance",""]]}};
+function openTpl(bid){const b=S.biz[bid];if(!b)return;
+  $("#layer").innerHTML=`<div class="sheet-wrap" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-label="Modèles"><div class="grab"></div><h2>Ajouter un modèle à « ${esc(b.name)} »</h2><p class="sub" style="margin:4px 6px 10px">Toutes les étapes sont créées avec leur durée et leur checklist, puis datées automatiquement.</p>
+  ${Object.entries(TEMPLATES).map(([k,t])=>`<button class="opt tpl" data-act="tpl-apply" data-k="${k}" data-biz="${bid}"><span><b>${esc(t.n)}</b><br><span style="color:var(--muted);font-weight:500;font-size:13px">${esc(t.d)}</span></span><small>${t.s.length} étapes</small></button>`).join("")}</div></div>`;
+  const f=$("#layer .opt");if(f)f.focus()}
+function offerOnboarding(c){$("#layer").innerHTML=`<div class="overlay" data-act="overlay"><div class="modal" role="dialog" aria-modal="true" aria-label="Client signé"><h2>🎉 ${esc(c.nom)} a signé !</h2><p class="sub">Je crée le parcours du client dans la feuille de route : paramétrage, formation, mise en service, facture et bilan à 30 jours, datés automatiquement ?</p><div class="mfoot"><span></span><div class="actions"><button class="btn ghost" data-act="close">Non merci</button><button class="btn primary" data-act="onboard" data-biz="${c.biz}" data-name="${esc(c.entreprise||c.nom)}">Créer le parcours</button></div></div></div></div>`}
+async function applyTpl(k,bid,prefix){const t=TEMPLATES[k];if(!t)return;closeModal();const ex=Object.values(S.jalons).filter(m=>m.biz===bid);
+  let o=ex.reduce((mx,m)=>Math.max(mx,num(m.ordre)),0);const now=new Date().toISOString();
+  const steps=prefix?t.s.slice(3):t.s;let first=true;
+  for(const [titre0,duree,phase,taches] of steps){o++;const titre=prefix?prefix+" : "+titre0[0].toLowerCase()+titre0.slice(1):titre0;await setDoc("jalons",newId("jalons"),{titre,biz:bid,date:"",statut:"a_faire",duree,apres:prefix&&first?"-":"",phase,taches:taches?tasksStr(taches.split("\n").map(x=>({ok:false,t:x}))):"",note:"",ordre:o,createdAt:now,updatedAt:now});first=false}
+  setTimeout(()=>applyPlan(bid,true).then(()=>toast(steps.length+" étapes ajoutées et planifiées")),300)}
+
+/* ================= Capture rapide ================= */
+const QTYPES=[["jalons","Étape"],["contacts","Prospect / relance"],["depense","Dépense"],["recette","Recette"],["achats","Achat"],["ameliorations","Idée d'app"]];
+const DAYS=["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+const MOIS=["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+function parseQuick(txt){let t=" "+txt+" ";let date="",amount="",type="jalons",biz="";const low=()=>t.toLowerCase();
+  const cut=re=>{t=t.replace(re," ")};let m;
+  if(/aujourd'?hui/i.test(t)){date=TODAY;cut(/aujourd'?hui/i)}
+  else if(/apr[eè]s[- ]demain/i.test(t)){date=addDays(TODAY,2);cut(/apr[eè]s[- ]demain/i)}
+  else if(/\bdemain\b/i.test(t)){date=addDays(TODAY,1);cut(/\bdemain\b/i)}
+  else if(m=t.match(/dans (\d+) (jours?|semaines?|mois)/i)){const n=+m[1];date=/sem/i.test(m[2])?addDays(TODAY,7*n):/mois/i.test(m[2])?addDays(TODAY,30*n):addDays(TODAY,n);cut(m[0])}
+  else if(m=t.match(/\b(?:le )?(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{2,4}))?\b/)){let y=m[3]?+m[3]:new Date().getFullYear();if(y<100)y+=2000;let d=iso(new Date(y,+m[2]-1,+m[1]));if(!m[3]&&d<TODAY)d=iso(new Date(y+1,+m[2]-1,+m[1]));date=d;cut(m[0])}
+  else if(m=t.match(new RegExp("\\b(?:le )?(\\d{1,2}) ("+MOIS.join("|")+")","i"))){const y=new Date().getFullYear();let d=iso(new Date(y,MOIS.indexOf(m[2].toLowerCase()),+m[1]));if(d<TODAY)d=iso(new Date(y+1,MOIS.indexOf(m[2].toLowerCase()),+m[1]));date=d;cut(m[0])}
+  else{for(let i=0;i<7;i++){const re=new RegExp("\\b(?:ce |le |)"+DAYS[i]+"( prochain)?\\b","i");if(re.test(t)){const now=new Date();let d=(i-now.getDay()+7)%7||7;date=addDays(TODAY,d);cut(re);break}}}
+  if(m=t.match(/(\d+(?:[.,]\d{1,2})?)\s?(€|euros?|eur)(?=[^\wÀ-ÿ]|$)/i)){amount=+m[1].replace(",",".");cut(m[0]);type="depense"}
+  const l=low();
+  if(/\b(relancer|rappeler|appeler|prospect|visiter|rdv|rendez-vous)\b/.test(l))type="contacts";
+  if(amount&&/\b(re[çc]u|encaiss|vendu|vente|facturé|paiement de|recette)/.test(l))type="recette";
+  else if(/\b(acheter|commander)\b/.test(l))type="achats";
+  if(/\b(bug|app|fonctionnalit|ajouter dans l'app)/.test(l)&&!amount&&type==="jalons")type="ameliorations";
+  for(const b of ordered()){const n=b.name.toLowerCase();const w=n.split(/[\s()]+/).filter(x=>x.length>=3&&!["livre","apps","projet","des","les","une"].includes(x));if(l.includes(n)||w.some(x=>new RegExp("\\b"+x.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b").test(l))){biz=b.id;if(!isTop(b))break}}
+  const clean=t.replace(/\s+/g," ").replace(/\s([,.])/g,"$1").trim().replace(/^(de |à |pour )/i,"");
+  return {date,amount,type,biz,text:clean?clean[0].toUpperCase()+clean.slice(1):""}}
+function openQuick(){if(!bizList().length){toast("Créez d'abord un business.");openForm("biz");return}
+  $("#layer").innerHTML=`<div class="overlay" data-act="overlay"><form class="modal quick" role="dialog" aria-modal="true" aria-label="Capture rapide" id="qform"><h2>Qu'est-ce qu'il faut faire ?</h2>
+  <p class="sub" style="margin:4px 0 14px">Écrivez comme vous parlez : « relancer le garage Martin jeudi », « licence photos 350 € », « imprimeur Lip dans 2 semaines ».</p>
+  <textarea id="qtext" rows="2" placeholder="Ex. Relancer le plombier Dupont vendredi" required></textarea>
+  <div class="seg qtypes" role="group" aria-label="Type">${QTYPES.map(([k,l2])=>`<button type="button" data-act="qtype" data-k="${k}">${l2}</button>`).join("")}</div>
+  <div class="fgrid" style="margin-top:12px"><div class="field"><label for="qbiz">Business</label><select id="qbiz">${ordered().map(b=>`<option value="${b.id}">${isTop(b)?"":"\u00a0\u00a0\u21b3 "}${esc(b.name)}</option>`).join("")}</select></div>
+  <div class="field"><label for="qdate">Date</label><input type="date" id="qdate"></div><div class="field" id="qamt-f"><label for="qamt">Montant (€)</label><input type="number" step="0.01" id="qamt"></div></div>
+  <div class="mfoot"><span class="help" id="qprev"></span><div class="actions"><button type="button" class="btn ghost" data-act="close">Annuler</button><button class="btn primary">Ajouter</button></div></div></form></div>`;
+  const f=$("#qform");const st={type:"jalons",touched:{}};const tx=$("#qtext");const bz=$("#qbiz");if(scope())bz.value=UI.proj||(kids(UI.biz)[0]?UI.biz:UI.biz);
+  const sync=()=>{const r=parseQuick(tx.value);if(!st.touched.type)st.type=r.type;if(!st.touched.date)$("#qdate").value=r.date||"";if(!st.touched.amt)$("#qamt").value=r.amount||"";if(!st.touched.biz&&r.biz)bz.value=r.biz;
+    f.querySelectorAll("[data-act=qtype]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===st.type));$("#qamt-f").hidden=!["depense","recette","achats"].includes(st.type);
+    $("#qprev").textContent=r.text?`→ ${L(QTYPES,st.type)} · ${(S.biz[bz.value]||{}).name||""}${$("#qdate").value?" · "+fmt($("#qdate").value):""}`:"";};
+  f._sync=sync;f._st=st;tx.addEventListener("input",sync);["qdate","qamt","qbiz"].forEach(i=>$("#"+i).addEventListener("change",()=>{st.touched[i==="qdate"?"date":i==="qamt"?"amt":"biz"]=1;sync()}));
+  tx.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();f.requestSubmit()}});
+  f.addEventListener("submit",async e=>{e.preventDefault();const r=parseQuick(tx.value);const text=r.text||tx.value.trim();if(!text)return;const biz=bz.value;const date=$("#qdate").value;const amt=num($("#qamt").value);const now=new Date().toISOString();const base={createdAt:now,updatedAt:now};let ok;
+    switch(st.type){
+      case "jalons":ok=await setDoc("jalons",newId("jalons"),{...base,titre:text,biz,date,statut:"a_faire",phase:"",note:""});break;
+      case "contacts":{const nom=text.replace(/^(relancer|rappeler|appeler|visiter|voir)\s+(le |la |les |l')?/i,"");const ex=Object.values(S.contacts).find(c=>nom.toLowerCase().includes(String(c.nom).toLowerCase())||(c.entreprise&&nom.toLowerCase().includes(String(c.entreprise).toLowerCase())));
+        if(ex)ok=await updDoc("contacts",ex.id,{relance:date||addDays(TODAY,1),updatedAt:now});
+        else ok=await setDoc("contacts",newId("contacts"),{...base,nom:nom[0].toUpperCase()+nom.slice(1),entreprise:"",type:"prospect",biz,etape:"a_contacter",relance:date||addDays(TODAY,1),note:tx.value.trim()});break}
+      case "depense":case "recette":ok=await setDoc("ops",newId("ops"),{...base,type:st.type,date:date||TODAY,libelle:text,biz,montant:amt,categorie:st.type==="recette"?"Vente":"Autre dépense",note:""});break;
+      case "achats":ok=await setDoc("achats",newId("achats"),{...base,article:text,biz,fournisseur:"",quantite:1,montant:amt||"",statut:"a_commander",date:date,paye:false,note:""});break;
+      case "ameliorations":ok=await setDoc("ameliorations",newId("ameliorations"),{...base,titre:text,biz,type:"Fonctionnalité",priorite:"moyenne",statut:"idee",date,description:""});break}
+    if(ok){closeModal();toast("Ajouté : "+L(QTYPES,st.type))}});
+  tx.focus()}
+
 /* ================= Écriture ================= */
 async function guard(fn){if(offline){fn.local();render();return true}try{await fn.remote();return true}catch(e){toast(e&&e.code==="not_granted"?"Vous n'avez pas le droit de modifier cette page.":"Enregistrement impossible : "+((e&&e.message)||"erreur"));return false}}
 const setDoc=(col,id,data)=>guard({local:()=>{S[col][id]={...data,id}},remote:()=>db.doc(col+"/"+id).set(data)});
@@ -503,8 +662,41 @@ function alerts(){const out=[];
   rows("ameliorations").filter(x=>x.type==="Bug"&&x.priorite==="haute"&&x.statut!=="livre").forEach(x=>out.push({d:x.date||"",late:!!x.date&&x.date<TODAY,col:"ameliorations",id:x.id,t:x.titre,k:"Bug prioritaire",biz:x.biz,bad:true}));
   rows("marketing").filter(m=>m.statut==="prevu"&&m.date&&m.date<=addDays(TODAY,7)).forEach(m=>out.push({d:m.date,late:m.date<TODAY,col:"marketing",id:m.id,t:m.titre,k:"Marketing",biz:m.biz}));
   return out.sort((a,b)=>(b.late-a.late)||((a.d||"9")<(b.d||"9")?-1:1))}
-function alertRow(a){return `<div class="item"><div><button class="t" data-act="edit" data-col="${a.col}" data-id="${a.id}">${esc(a.t)}</button><div class="meta"><span class="chip ${a.bad?"bad":a.col==="achats"?"info":"acc"}">${esc(a.k)}</span>${hideTag()?"":bTag(a.biz)}${a.m?`<span class="money">${eur(a.m)}</span>`:""}</div></div><div>${a.d?dueChip(a.d,false):""}</div></div>`}
+function alertRow(a){return `<div class="item"><div><button class="t" data-act="edit" data-col="${a.col}" data-id="${a.id}">${esc(a.t)}</button><div class="meta"><span class="chip ${a.bad?"bad":a.col==="achats"?"info":"acc"}">${esc(a.k)}</span>${hideTag()?"":bTag(a.biz)}${a.m?`<span class="money">${eur(a.m)}</span>`:""}</div></div><div class="arow">${a.d?dueChip(a.d,false):""}${["jalons","contacts","marketing"].includes(a.col)?`<span class="qa">${a.col==="contacts"?`<button class="btn sm ghost" data-act="relance-done" data-id="${a.id}" title="J'ai relancé : prochaine relance dans 7 jours">Relancé ✓</button>`:a.col==="jalons"?`<button class="btn sm ghost" data-act="ms-toggle" data-id="${a.id}" title="Marquer comme fait">Fait ✓</button>`:""}<button class="btn sm ghost" data-act="snooze" data-col="${a.col}" data-id="${a.id}" title="Reporter d'une semaine">+7 j</button></span>`:""}</div></div>`}
 
+const monday=()=>{const d=new Date();const k=(d.getDay()+6)%7;d.setDate(d.getDate()-k);return iso(d)};
+const pref=k=>S.prefs[k]||{};
+const focusIds=()=>{const f=pref("focus");return f.semaine===monday()?(f.ids||[]).filter(id=>S.jalons[id]):[]};
+function focusPanel(){if(loading())return "";const ids=focusIds().filter(id=>inBiz(S.jalons[id]));const rv=pref("revue").date;const due=!rv||diff(TODAY,rv)>=6;
+  if(!ids.length)return `<section class="panel focus empty-f"><div><h2>Mes 3 priorités de la semaine</h2><p class="sub" style="margin-top:4px">${due?"Faites la revue de la semaine (10 minutes) : on regarde ce qui avance, ce qui glisse, et vous choisissez 3 priorités.":"Aucune priorité choisie pour cette semaine."}</p></div><button class="btn primary" data-act="review">Faire la revue</button></section>`;
+  const L2=ids.map(id=>S.jalons[id]);const d=L2.filter(m=>m.statut==="fait").length;
+  return `<section class="panel focus"><div class="panel-head"><h2>Mes priorités de la semaine</h2><div class="actions"><span class="chip ${d===L2.length?"ok":"acc"}">${d}/${L2.length} faites</span><button class="btn sm ghost" data-act="review">${due?"Revue de la semaine":"Modifier"}</button></div></div>
+  <div class="fitems">${L2.map(m=>`<div class="fitem ${m.statut==="fait"?"done":""}" style="--pc:${bcol(S.biz[m.biz])}"><button class="fchk" data-act="ms-toggle" data-id="${m.id}" aria-label="${m.statut==="fait"?"Rouvrir":"Marquer comme faite"} : ${esc(m.titre)}">${m.statut==="fait"?"✓":""}</button><div style="min-width:0"><button class="t" data-act="edit" data-col="jalons" data-id="${m.id}">${esc(m.titre)}</button><div class="meta">${bTag(m.biz)}${m.date&&m.statut!=="fait"?dueChip(m.date,false):""}</div></div></div>`).join("")}</div></section>`}
+function openReview(){const wk=addDays(TODAY,-7);const all=Object.values(S.jalons);
+  const done=all.filter(m=>m.statut==="fait"&&(m.updatedAt||"").slice(0,10)>=wk);
+  const sv=[UI.biz,UI.proj];UI.biz="";UI.proj="";const late=alerts().filter(a=>a.late);const rel=Object.values(S.contacts).filter(c=>c.relance&&c.relance>=TODAY&&c.relance<=addDays(TODAY,7)&&!["signe","perdu"].includes(c.etape));UI.biz=sv[0];UI.proj=sv[1];
+  const cur=new Set(focusIds());const cand=all.filter(m=>m.statut!=="fait"&&!waitingOn(m)).sort((a,b)=>(cur.has(b.id)-cur.has(a.id))||((a.date||"9")<(b.date||"9")?-1:1)).slice(0,14);
+  $("#layer").innerHTML=`<div class="overlay" data-act="overlay"><form class="modal review" role="dialog" aria-modal="true" aria-label="Revue de la semaine" id="rform"><h2>Revue de la semaine</h2><p class="sub" style="margin:4px 0 6px">10 minutes pour faire le point et choisir sur quoi avancer.</p>
+  <h3>1. Bravo ✨ <span class="chip ok">${done.length} étape${done.length>1?"s":""} terminée${done.length>1?"s":""} en 7 jours</span></h3>${done.length?`<ul class="rl">${done.slice(0,8).map(m=>`<li>${esc(m.titre)} ${bTag(m.biz)}</li>`).join("")}</ul>`:`<p class="empty">Rien de terminé cette semaine : on choisit des priorités plus petites ?</p>`}
+  <h3>2. Ce qui a glissé <span class="chip ${late.length?"late":"ok"}">${late.length}</span></h3>${late.length?late.map(alertRow).join(""):`<p class="empty">Rien en retard.</p>`}
+  <h3>3. Relances des 7 prochains jours <span class="chip">${rel.length}</span></h3>${rel.length?`<ul class="rl">${rel.map(c=>`<li>${esc(c.nom)}${c.entreprise?" ("+esc(c.entreprise)+")":""} · ${fmt(c.relance)}</li>`).join("")}</ul>`:`<p class="empty">Aucune relance prévue. Pensez à prospecter !</p>`}
+  <h3>4. Mes 3 priorités de la semaine</h3>${cand.length?`<div class="rcand">${cand.map(m=>`<label class="rc" style="--pc:${bcol(S.biz[m.biz])}"><input type="checkbox" name="f" value="${m.id}" ${cur.has(m.id)?"checked":""}><span><b>${esc(m.titre)}</b><small>${esc((S.biz[m.biz]||{}).name||"")}${m.date?" · "+fmt(m.date):""}</small></span></label>`).join("")}</div>`:`<p class="empty">Aucune étape disponible : ajoutez-en dans la feuille de route ou appliquez un modèle.</p>`}
+  <div class="mfoot"><span class="help" id="rhelp">Choisissez 3 étapes maximum.</span><div class="actions"><button type="button" class="btn ghost" data-act="close">Plus tard</button><button class="btn primary">Valider ma semaine</button></div></div></form></div>`;
+  const f=$("#rform");f.addEventListener("change",e=>{if(e.target.name==="f"){const n=f.querySelectorAll("input[name=f]:checked").length;if(n>3){e.target.checked=false;toast("3 priorités maximum : c'est le secret pour avancer.")}}});
+  f.addEventListener("submit",async e=>{e.preventDefault();const ids=[...f.querySelectorAll("input[name=f]:checked")].map(x=>x.value);const now=new Date().toISOString();
+    await setDoc("prefs","focus",{ids,semaine:monday(),updatedAt:now});await setDoc("prefs","revue",{date:TODAY,updatedAt:now});closeModal();toast("Semaine validée. Bon courage !")})}
+function icsExport(){const sv=[UI.biz,UI.proj];UI.biz="";UI.proj="";const ev=[];
+  Object.values(S.jalons).filter(m=>m.statut!=="fait"&&m.date).forEach(m=>ev.push([m.date,m.titre,(S.biz[m.biz]||{}).name,"j-"+m.id]));
+  Object.values(S.contacts).filter(c=>c.relance&&!["signe","perdu"].includes(c.etape)).forEach(c=>ev.push([c.relance,"Relancer "+c.nom+(c.entreprise?" ("+c.entreprise+")":""),(S.biz[c.biz]||{}).name||"Contacts","c-"+c.id]));
+  Object.values(S.marketing).filter(m=>m.statut==="prevu"&&m.date).forEach(m=>ev.push([m.date,"Marketing : "+m.titre,(S.biz[m.biz]||{}).name,"m-"+m.id]));
+  (typeof extraEvents==="function"?extraEvents():[]).forEach(x=>ev.push(x));
+  UI.biz=sv[0];UI.proj=sv[1];
+  const e2=t=>String(t||"").replace(/[\\;,]/g,m=>"\\"+m).replace(/\n/g,"\\n");const st=new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z";
+  const body=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//QG Business//FR","CALSCALE:GREGORIAN","X-WR-CALNAME:QG Business"].concat(...ev.map(([d,t,b,u])=>{const d1=d.replace(/-/g,""),d2=addDays(d,1).replace(/-/g,"");return ["BEGIN:VEVENT","UID:"+u+"@qg-business","DTSTAMP:"+st,"DTSTART;VALUE=DATE:"+d1,"DTEND;VALUE=DATE:"+d2,"SUMMARY:"+e2(t),"DESCRIPTION:"+e2(b||""),"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+e2(t),"TRIGGER:PT9H","END:VALARM","END:VEVENT"]}),["END:VCALENDAR"]).join("\r\n");
+  return {n:ev.length,body}}
+async function saveFile(name,data,type){const dl=window.claude&&window.claude.use?await window.claude.use("downloads").catch(()=>null):null;
+  if(!dl){toast("Le téléchargement n'est pas disponible ici.");return false}
+  try{await dl.save({filename:name,data:new Blob([data],{type})});return true}catch(err){if(!(err&&err.code==="declined"))toast("Téléchargement impossible : "+((err&&err.message)||"erreur"));return false}}
 function nextSteps(n){const L=rows("jalons").filter(m=>m.statut!=="fait").sort((a,b)=>(a.date||"9")<(b.date||"9")?-1:(a.date||"9")>(b.date||"9")?1:0).slice(0,n||8);
   return L.length?L.map(m=>`<div class="item"><div><button class="t" data-act="edit" data-col="jalons" data-id="${m.id}">${esc(m.titre)}</button><div class="meta">${hideTag()?"":bTag(m.biz)}${m.statut==="en_cours"?`<span class="chip info">En cours</span>`:m.statut==="bloque"?`<span class="chip bad">Bloqué</span>`:""}</div></div><div>${m.date?dueChip(m.date,false):`<span class="chip">Sans date</span>`}</div></div>`).join(""):`<p class="empty">Aucune étape à venir. Ajoutez les grandes étapes dans la feuille de route.</p>`}
 function vTableau(){
@@ -521,7 +713,7 @@ function vTableau(){
       <div class="hero-n"><div><b>${tops().length}</b><span>univers</span></div><div><b>${bizList().filter(b=>!isTop(b)).length+tops().filter(t=>!kids(t.id).length).length}</b><span>projets</span></div><div><b>${ms.filter(m=>m.statut!=="fait").length}</b><span>étapes à venir</span></div></div></div>`
     :`<div class="hero" style="--pc:${bcol(cur)}"><div class="hero-t"><div class="eyebrow">${p?esc(u.name):esc(L(PHASES,u.phase))}</div><h1>${esc(cur.name)}</h1>${cur.activite?`<p class="sub">${esc(cur.activite)}</p>`:""}${cur.objectif?`<p class="goal"><b>Objectif</b> ${esc(cur.objectif)}</p>`:""}</div>
       <div class="actions"><button class="btn" data-act="new" data-col="ops">+ Opération</button>${addBtn("jalons","Étape")}<button class="btn ghost" data-act="edit" data-col="biz" data-id="${cur.id}">Modifier</button></div></div>`;
-  return `${offline?`<div class="banner">La base de données n'est pas disponible dans cette vue : vous pouvez tester le logiciel, mais rien ne sera enregistré.</div>`:""}${hero}
+  return `${offline?`<div class="banner">La base de données n'est pas disponible dans cette vue : vous pouvez tester le logiciel, mais rien ne sera enregistré.</div>`:""}${hero}${focusPanel()}
   <div class="kpis">
     <div class="kpi"><span class="lab">Résultat ${y}</span><span class="val ${T.res>=0?"pos":"neg"}">${eur(T.res)}</span><span class="hint">${eur(T.in)} de recettes · ${eur(T.out)} de dépenses</span></div>
     <div class="kpi"><span class="lab">Feuille de route</span><span class="val">${msDone}/${ms.length}</span><span class="hint">étapes terminées</span></div>
@@ -555,14 +747,21 @@ function vBusiness(){
   return head("Univers & projets","Portefeuille",`Un univers regroupe des projets du même thème (par exemple les livres de luxe ou les apps de cuisine). Les chiffres d'un univers additionnent ceux de ses projets. « Afficher » filtre tous les onglets.`,addBtn("biz","Univers ou business"))+
   (T.length?`<div class="univs">${T.map(t=>{const K=kids(t.id);return `<section class="univ" style="--pc:${bcol(t)}"><div class="uh"><h2><span class="dot"></span>${esc(t.name)}</h2><span class="pctv">${K.length?K.length+" projet"+(K.length>1?"s":""):"business seul"}</span></div><div class="cards">${bizCard(t)}${K.map(bizCard).join("")}<button class="addcard" data-act="new" data-col="biz" data-parent="${t.id}">+ Nouveau projet dans « ${esc(t.name)} »</button></div></section>`}).join("")}</div>`:emptyBiz())}
 
+function planLine(b){const ms=Object.values(S.jalons).filter(m=>m.biz===b.id);if(!ms.some(m=>num(m.duree)>0)&&!b.cible)return "";const {fin,marge}=computePlan(b.id);
+  if(!fin&&!b.cible)return "";const cls=marge==null?"":marge<0?"late":marge<7?"soon":"ok";
+  return `<div class="planline ${cls}">${fin?`Fin estimée <b>${fmt(fin)}</b>`:""}${b.cible?` · objectif ${fmt(b.cible)}`:""}${marge!=null?(marge>=0?` · <b>${marge} j de marge</b>`:` · <b>${-marge} j de retard prévu</b> : raccourcissez une étape ou décalez l'objectif`):b.cible?"":` · <button class="lkbtn" data-act="edit" data-col="biz" data-id="${b.id}">fixer une date cible</button>`}</div>`}
+function stepExtra(m){const w=waitingOn(m);const T=parseTasks(m.taches);const d=T.filter(x=>x.ok).length;
+  let h=`<div class="meta">`+(w?`<span class="chip">⏳ après « ${esc(w.titre.length>38?w.titre.slice(0,36)+"…":w.titre)} »</span>`:"")+(num(m.duree)>0&&m.statut!=="fait"?`<span class="chip">~${num(m.duree)} j</span>`:"")+(T.length?`<span class="chip ${d===T.length?"ok":""}">☑ ${d}/${T.length}</span>`:"")+`</div>`;
+  if(T.length&&m.statut!=="fait"&&!w)h+=`<ul class="subt">${T.map((x,i)=>`<li><label><input type="checkbox" data-act="sub" data-id="${m.id}" data-i="${i}" ${x.ok?"checked":""}> <span>${esc(x.t)}</span></label></li>`).join("")}</ul>`;
+  return h}
 function vFeuille(){
   if(loading())return head("Feuille de route","Chargement…");
   if(!bizList().length)return head("Feuille de route","Étapes clés")+emptyBiz();
   const bl=UI.biz?ordered().filter(b=>famIds(UI.biz).includes(b.id)):ordered();
   return head("Feuille de route","Étapes clés par business","Les grandes étapes de chaque business, avec une date cible. Cliquez sur le losange pour marquer une étape comme faite.",`<label class="btn ghost" style="cursor:pointer"><input type="checkbox" id="msdone" ${UI.msShowDone?"checked":""}> Afficher les étapes faites</label>${addBtn("jalons","Étape")}`)+
-  `<div class="road">${bl.map(b=>{const ms=Object.values(S.jalons).filter(m=>m.biz===b.id).sort((x,y)=>(x.date||"9")<(y.date||"9")?-1:1);const vis=ms.filter(m=>UI.msShowDone||m.statut!=="fait");const done=ms.filter(m=>m.statut==="fait").length;
-    return `<section class="rbiz" style="--pc:${bcol(b)}"><div class="rh"><div><h2>${esc(b.name)}</h2><div class="phases" style="width:220px;margin-top:6px">${PHASES.map((p,i)=>`<i class="${i<=PHASES.findIndex(q=>q[0]===b.phase)?"on":""}"></i>`).join("")}</div></div><div class="actions"><span class="pctv">${done}/${ms.length} faites · phase ${esc(L(PHASES,b.phase))}</span><button class="btn sm" data-act="new" data-col="jalons" data-biz="${b.id}">+ Étape</button></div></div>
-    ${vis.length?vis.map(m=>{const late=m.statut!=="fait"&&m.date&&m.date<TODAY;return `<div class="ms"><button class="diamond ${m.statut==="fait"?"done":""} ${late?"late":""}" style="all:unset;cursor:pointer;width:11px;height:11px;transform:rotate(45deg);border:2px solid ${late?"var(--late)":"var(--pc)"};border-radius:2px;margin-left:4px;${m.statut==="fait"?"background:var(--pc)":""}" data-act="ms-toggle" data-id="${m.id}" aria-label="${m.statut==="fait"?"Rouvrir":"Marquer comme faite"} : ${esc(m.titre)}"></button><span class="d">${m.date?fmt(m.date):"Sans date"}</span><div style="min-width:0"><button class="t" style="all:unset;cursor:pointer;font-weight:500;overflow-wrap:anywhere;${m.statut==="fait"?"color:var(--muted);text-decoration:line-through":""}" data-act="edit" data-col="jalons" data-id="${m.id}">${esc(m.titre)}</button>${m.phase?` <span class="chip" style="margin-left:6px">${esc(L(PHASES,m.phase))}</span>`:""}</div><div>${m.statut==="bloque"?`<span class="chip bad">Bloqué</span>`:m.statut==="en_cours"?`<span class="chip info">En cours</span>`:late?`<span class="chip late">En retard</span>`:m.statut==="fait"?`<span class="chip ok">Fait</span>`:""}</div></div>`}).join(""):`<p class="empty">${ms.length?"Toutes les étapes sont faites.":"Aucune étape. Ajoutez les grandes étapes jusqu'au lancement."}</p>`}</section>`}).join("")}</div>`}
+  `<div class="road">${bl.map(b=>{const ms=Object.values(S.jalons).filter(m=>m.biz===b.id).sort(byOrd);const vis=ms.filter(m=>UI.msShowDone||m.statut!=="fait");const done=ms.filter(m=>m.statut==="fait").length;
+    return `<section class="rbiz" style="--pc:${bcol(b)}"><div class="rh"><div><h2>${esc(b.name)}</h2><div class="phases" style="width:220px;margin-top:6px">${PHASES.map((p,i)=>`<i class="${i<=PHASES.findIndex(q=>q[0]===b.phase)?"on":""}"></i>`).join("")}</div></div><div class="actions"><span class="pctv">${done}/${ms.length} faites · phase ${esc(L(PHASES,b.phase))}</span><button class="btn sm ghost" data-act="tpl" data-biz="${b.id}">Modèle</button>${ms.some(m=>num(m.duree)>0)?`<button class="btn sm ghost" data-act="plan" data-biz="${b.id}">Planifier</button>`:""}<button class="btn sm" data-act="new" data-col="jalons" data-biz="${b.id}">+ Étape</button></div></div>${planLine(b)}
+    ${vis.length?vis.map(m=>{const late=m.statut!=="fait"&&m.date&&m.date<TODAY;return `<div class="ms"><button class="diamond ${m.statut==="fait"?"done":""} ${late?"late":""}" style="all:unset;cursor:pointer;width:11px;height:11px;transform:rotate(45deg);border:2px solid ${late?"var(--late)":"var(--pc)"};border-radius:2px;margin-left:4px;${m.statut==="fait"?"background:var(--pc)":""}" data-act="ms-toggle" data-id="${m.id}" aria-label="${m.statut==="fait"?"Rouvrir":"Marquer comme faite"} : ${esc(m.titre)}"></button><span class="d">${m.date?fmt(m.date):"Sans date"}</span><div style="min-width:0"><button class="t" style="all:unset;cursor:pointer;font-weight:500;overflow-wrap:anywhere;${m.statut==="fait"?"color:var(--muted);text-decoration:line-through":""}" data-act="edit" data-col="jalons" data-id="${m.id}">${esc(m.titre)}</button>${m.phase?` <span class="chip" style="margin-left:6px">${esc(L(PHASES,m.phase))}</span>`:""}${stepExtra(m)}</div><div>${m.statut==="bloque"?`<span class="chip bad">Bloqué</span>`:m.statut==="en_cours"?`<span class="chip info">En cours</span>`:late?`<span class="chip late">En retard</span>`:m.statut==="fait"?`<span class="chip ok">Fait</span>`:""}</div></div>`}).join(""):`<p class="empty">${ms.length?"Toutes les étapes sont faites.":"Aucune étape. Ajoutez les grandes étapes jusqu'au lancement."}</p>`}</section>`}).join("")}</div>`}
 
 function vFinances(){
   if(loading())return head("Finances","Chargement…");
@@ -722,6 +921,8 @@ function renderChrome(){
 function openSheet(){
   $("#layer").innerHTML=`<div class="sheet-wrap" data-act="overlay"><div class="sheet" role="dialog" aria-modal="true" aria-label="Menu"><div class="grab"></div><h2>Menu</h2>
   <button class="opt" data-act="new" data-col="biz" style="color:var(--accent)">＋ Nouvel univers ou business</button>
+  <button class="opt" data-act="review">✦ Revue de la semaine<small>3 priorités</small></button>
+  <button class="opt" data-act="ics">📅 Envoyer dans mon calendrier<small>fichier .ics</small></button>
   <div class="sep"></div><h2 style="margin-top:12px">Sauvegarde</h2>
   <button class="opt" data-act="export">⤓ Exporter toutes les données<small>fichier .json</small></button>
   <label class="opt" style="cursor:pointer">⤒ Restaurer depuis un fichier<small>remplace les éléments du même nom</small><input type="file" id="importfile" accept="application/json,.json" hidden></label></div></div>`;
@@ -748,6 +949,7 @@ function fieldHtml(f,v,rec){const id="f-"+f.k;const val=v==null?"":v;let input;
   else if(f.t==="sel")input=`<select id="${id}" name="${f.k}">${f.k==="phase"&&!f.req&&f.def===""?`<option value="">—</option>`:""}${f.o.map(([k,l])=>`<option value="${esc(k)}" ${val===k?"selected":""}>${esc(l)}</option>`).join("")}</select>`;
   else if(f.t==="biz")input=`<select id="${id}" name="${f.k}" ${f.req?"required":""}>${f.req?"":`<option value="">— Aucun —</option>`}${ordered().map(b=>`<option value="${b.id}" ${val===b.id?"selected":""}>${isTop(b)?"":"\u00a0\u00a0\u21b3 "}${esc(b.name)}</option>`).join("")}</select>`;
   else if(f.t==="parent"){const hasKids=rec.id&&kids(rec.id).length;input=`<select id="${id}" name="${f.k}" ${hasKids?"disabled":""}><option value="">— Aucun (univers ou business principal) —</option>${tops().filter(b=>b.id!==rec.id).map(b=>`<option value="${b.id}" ${val===b.id?"selected":""}>${esc(b.name)}</option>`).join("")}</select>${hasKids?`<span class="help">Cet univers contient déjà des projets : il ne peut pas être rangé dans un autre.</span>`:""}`}
+  else if(f.t==="dep"){const L2=Object.values(S.jalons).filter(m=>m.biz===(rec.biz||scope())&&m.id!==rec.id).sort(byOrd);input=`<select id="${id}" name="${f.k}"><option value="">— Automatique (étape précédente) —</option><option value="-" ${val==="-"?"selected":""}>— Aucune, peut commencer tout de suite —</option>${L2.map(m=>`<option value="${m.id}" ${val===m.id?"selected":""}>${esc(m.titre)}</option>`).join("")}</select>`}
   else if(f.t==="cat"){const out=(rec.type||"depense")!=="recette";input=`<select id="${id}" name="${f.k}">${(out?OP_CAT_OUT:OP_CAT_IN).map(c=>`<option ${val===c?"selected":""}>${esc(c)}</option>`).join("")}</select>`}
   else if(f.t==="bool")return `<div class="field"><span class="flabel">${f.l}</span><label class="chk"><input type="checkbox" id="${id}" name="${f.k}" ${val?"checked":""}> Oui</label>${f.help?`<span class="help">${f.help}</span>`:""}</div>`;
   else if(f.t==="color")return `<div class="field full"><span class="flabel">${f.l}</span><div class="colors" role="radiogroup" aria-label="${f.l}">${COLORS.map(c=>`<label><input type="radio" name="${f.k}" value="${c}" ${val===c?"checked":""}><span style="--pc:var(--${c})"></span></label>`).join("")}</div></div>`;
@@ -769,9 +971,14 @@ function openForm(col,rec,preset){
     if(sc.fields.some(x=>x.t==="url"&&x.req&&!safeUrl(data[x.k]))){toast("Le lien doit commencer par https://");return}
     const now=new Date().toISOString();let ok;
     if(col==="ameliorations")data.livreLe=data.statut==="livre"?((rec&&rec.livreLe)||TODAY):"";
+    let signedNow=false;
+    if(col==="contacts"&&(data.type==="prospect"||data.type==="client")){const prev=rec&&rec.etape;const ch=isNew||prev!==data.etape;const gap={a_contacter:1,contacte:3,rdv:2,devis:5}[data.etape];
+      if(ch&&gap&&(!data.relance||data.relance<TODAY||(rec&&data.relance===rec.relance)))data.relance=addDays(TODAY,gap);
+      if(ch&&(data.etape==="signe"||data.etape==="perdu")&&rec&&data.relance===rec.relance)data.relance="";
+      if(ch&&data.etape==="signe"&&prev!=="signe"){data.type="client";signedNow=!!data.biz}}
     if(isNew){const id=newId(col);if(col==="biz")data.order=bizList().length;data.createdAt=now;data.updatedAt=now;ok=await setDoc(col,id,data)}
     else{data.updatedAt=now;ok=await updDoc(col,rec.id,data)}
-    if(ok){closeModal();toast(isNew?"Ajouté":"Enregistré")}});
+    if(ok){closeModal();toast(isNew?"Ajouté":"Enregistré");if(signedNow)offerOnboarding(data)}});
   const first=f.querySelector("input:not([type=radio]),select,textarea");if(first)first.focus()}
 
 /* ================= Actions ================= */
@@ -788,7 +995,21 @@ document.addEventListener("click",async e=>{const el=e.target.closest("[data-act
     case "theme":{const r=document.documentElement;const dark=r.dataset.theme!=="dark";if(dark)r.dataset.theme="dark";else r.dataset.theme="light";try{localStorage.setItem("qg-theme",r.dataset.theme)}catch(err){}themeBtn();break}
     case "biz":{closeModal();const b=S.biz[id];location.hash=!b?"accueil":isTop(b)?b.id:b.parent+"--tableau";if(b&&!isTop(b)){UI.biz=b.parent;UI.proj=b.id;render()}break}
     case "proj":UI.proj=id||"";render();break;
-    case "ms-toggle":{const m=S.jalons[id];if(m)await updDoc("jalons",id,{statut:m.statut==="fait"?"a_faire":"fait",updatedAt:new Date().toISOString()});break}
+    case "tpl":openTpl(el.dataset.biz);break;
+    case "tpl-apply":applyTpl(el.dataset.k,el.dataset.biz);break;
+    case "plan":applyPlan(el.dataset.biz);break;
+    case "quick":openQuick();break;
+    case "review":openReview();break;
+    case "onboard":applyTpl("client",el.dataset.biz,el.dataset.name);break;
+    case "ics":{const r=icsExport();if(!r.n){toast("Aucune date à envoyer pour l'instant.");break}if(await saveFile("qg-business-calendrier.ics",r.body,"text/calendar")){closeModal();toast(r.n+" rendez-vous exportés : ouvrez le fichier pour les ajouter au Calendrier")}break}
+    case "snooze":{const r=S[col]&&S[col][id];if(!r)break;const k=col==="contacts"?"relance":"date";const base=r[k]&&r[k]>TODAY?r[k]:TODAY;await updDoc(col,id,{[k]:addDays(base,7),updatedAt:new Date().toISOString()});toast("Reporté au "+fmt(addDays(base,7)));if($("#rform"))openReview();break}
+    case "relance-done":{const c=S.contacts[id];if(!c)break;const nx=addDays(TODAY,7);await updDoc("contacts",id,{relance:nx,etape:c.etape==="a_contacter"?"contacte":c.etape,note:((c.note||"")+"\n"+fmt(TODAY)+" : relancé").trim(),updatedAt:new Date().toISOString()});toast("Noté. Prochaine relance le "+fmt(nx));if($("#rform"))openReview();break}
+    case "qtype":{const f=$("#qform");if(f){f._st.type=el.dataset.k;f._st.touched.type=1;f._sync()}break}
+    case "sub":{const m=S.jalons[id];if(!m)break;const T=parseTasks(m.taches);const i=+el.dataset.i;if(!T[i])break;T[i].ok=el.checked;const all=T.every(x=>x.ok);
+      await updDoc("jalons",id,{taches:tasksStr(T),statut:all?"fait":m.statut==="a_faire"?"en_cours":m.statut,updatedAt:new Date().toISOString()});if(all){toast("Étape terminée 🎉");applyPlan(m.biz,true)}break}
+    case "ms-toggle":{const m=S.jalons[id];if(!m)break;const done=m.statut!=="fait";await updDoc("jalons",id,{statut:done?"fait":"a_faire",...(done&&num(m.duree)>0?{date:TODAY}:{}),updatedAt:new Date().toISOString()});
+      if(Object.values(S.jalons).some(x=>x.biz===m.biz&&num(x.duree)>0))setTimeout(()=>applyPlan(m.biz,true),200);
+      if(done){const nx=Object.values(S.jalons).find(x=>x.statut!=="fait"&&predOf(x)&&predOf(x).id===m.id);toast(nx?"Bravo ! Étape suivante : "+nx.titre:"Étape terminée 🎉")}break}
     case "ask-del":{const extra=col==="biz"?" Ses étapes, opérations, achats et actions resteront enregistrés mais sans business.":"";$("#delzone").innerHTML=`<div class="confirm">Supprimer définitivement ?${extra}<button type="button" class="btn danger sm" data-act="del" data-col="${col}" data-id="${id}">Oui, supprimer</button></div>`;break}
     case "del":if(await delDoc(col,id)){closeModal();toast("Supprimé")}break;
     case "amtype":UI.amType=el.dataset.k;render();break;
