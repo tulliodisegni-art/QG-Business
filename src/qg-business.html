@@ -1035,6 +1035,7 @@ function parseQuick(txt){let t=" "+txt+" ";let date="",amount="",type="jalons",b
   const clean=t.replace(/\s+/g," ").replace(/\s([,.])/g,"$1").trim().replace(/^(de |à |pour )/i,"");
   return {date,amount,type,biz,text:clean?clean[0].toUpperCase()+clean.slice(1):""}}
 function openQuick(){if(!bizList().length){toast("Créez d'abord un business.");openForm("biz");return}
+  if(UI.view==="ameliorations"&&UI.biz){openForm("ameliorations");return}
   $("#layer").innerHTML=`<div class="overlay" data-act="overlay"><form class="modal quick" role="dialog" aria-modal="true" aria-label="Capture rapide" id="qform"><h2>Qu'est-ce qu'il faut faire ?</h2>
   <p class="sub" style="margin:4px 0 14px">Écrivez comme vous parlez : « relancer le garage Martin jeudi », « licence photos 350 € », « imprimeur Lip dans 2 semaines ».</p>
   <textarea id="qtext" rows="2" placeholder="Ex. Relancer le plombier Dupont vendredi" required></textarea>
