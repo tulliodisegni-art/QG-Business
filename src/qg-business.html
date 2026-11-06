@@ -506,6 +506,7 @@ const SCHEMA={
     {k:"parent",l:"Fait partie de l'univers",t:"parent",full:1,help:"Laissez vide pour créer un univers (ex. Livres de luxe) ou un business seul."},
     {k:"logo",l:"Logo (onglet du bas)",t:"logo",full:1},
     {k:"depot",l:"Dépôt GitHub de l'appli (pour que Claude la modifie)",t:"text",full:1,ph:"Ex. tulliodisegni-art/Mijonote"},
+    {k:"site",l:"Adresse de l'appli en ligne",t:"url",full:1,ph:"Ex. https://tulliodisegni-art.github.io/Mijonote/"},
     {k:"activite",l:"Activité",t:"text",full:1,ph:"Ex. Secrétariat téléphonique IA pour artisans"},
     {k:"objectif",l:"Objectif principal",t:"text",full:1,ph:"Ex. 5 clients abonnés d'ici juin"},
     {k:"phase",l:"Phase",t:"sel",o:PHASES,def:"idee"},
@@ -836,12 +837,19 @@ function openGH(msg){const t=ghTok();
   ${msg?`<div class="planline late" style="margin:12px 0">${esc(msg)}</div>`:""}
   <div class="planline ${t?"ok":"soon"}" style="margin:12px 0"><b>${t?"Code GitHub enregistré sur cet appareil":"À faire une fois sur chaque appareil"}</b></div>
   <div class="planline" style="margin:0 0 12px">Envoyées à Claude cette semaine : <b>${rows("ameliorations").filter(x=>x.gh&&x.gh.at&&x.gh.at.slice(0,10)>=monday()).length}</b> · <a href="https://claude.ai/settings/usage" target="_blank" rel="noopener">Voir ma consommation Claude ↗</a></div>
-  <div class="field"><label for="gh-t">Code d'accès GitHub</label><input id="gh-t" type="password" autocomplete="off" placeholder="github_pat_…" value=""></div>
-  <p class="help">Créez-le sur github.com › Settings › Developer settings › Fine-grained tokens : accès à vos dépôts d'applis, permission « Issues : Read and write ». Il reste sur cet appareil.</p>
+  <div class="field"><label for="gh-t">Code d'accès GitHub</label><input id="gh-t" type="password" autocomplete="off" placeholder="${t?"Enregistré (laisser vide pour le garder)":"github_pat_…"}" value=""></div>
+  <p class="help">github.com › Settings › Developer settings › Fine-grained tokens. Pour modifier les applis : accès à vos dépôts et « Issues : Read and write ». Pour aussi créer de nouvelles applis : « All repositories » et, en Read and write, Administration, Contents, Issues, Pages, Secrets et Workflows. Il reste sur cet appareil.</p>
+  <div class="field"><label for="cc-t">Code Claude (commande « claude setup-token »)</label><input id="cc-t" type="password" autocomplete="off" placeholder="${ccTok()?"Enregistré (laisser vide pour le garder)":"sk-ant-oat01-…"}" value=""></div>
+  <p class="help">QG le dépose sur chaque appli pour que Claude puisse y travailler avec votre abonnement. Il reste sur cet appareil.</p>
+  ${t&&ccTok()?`<div class="actions" style="margin:4px 0 8px"><button type="button" class="btn" id="cc-all">🔌 Brancher Claude sur toutes mes applis</button></div><div id="cc-res"></div>`:""}
   <div class="mfoot">${t?`<button type="button" class="btn ghost" id="gh-off">Retirer</button>`:"<span></span>"}<div class="actions"><button type="button" class="btn ghost" data-act="close">Fermer</button><button class="btn primary">Enregistrer et tester</button></div></div></form></div>`;
   const off=$("#gh-off");if(off)off.addEventListener("click",()=>{try{localStorage.removeItem("qg_gh")}catch(e){}openGH()});
-  $("#ghf").addEventListener("submit",async e=>{e.preventDefault();const v=$("#gh-t").value.trim();if(v)try{localStorage.setItem("qg_gh",v)}catch(x){}
-    try{const u=await gh("/user");toast("GitHub connecté : "+u.login);closeModal()}catch(x){openGH(x.message)}})}
+  const all=$("#cc-all");if(all)all.addEventListener("click",async()=>{all.disabled=true;all.textContent="Branchement…";const res=$("#cc-res");
+    const repos=[...new Set(["tulliodisegni-art/QG-Business",...Object.keys(S.biz).map(depotOf).filter(Boolean)])];const out=[];
+    for(const r of repos){try{await ghSecret(r,"CLAUDE_CODE_OAUTH_TOKEN",ccTok());out.push(`<div class="planline ok" style="margin:4px 0">✓ ${esc(r.split("/")[1])}</div>`)}catch(x){out.push(`<div class="planline late" style="margin:4px 0">⚠️ ${esc(r.split("/")[1])} : ${esc(x.message)}</div>`)}res.innerHTML=out.join("")}
+    all.disabled=false;all.textContent="🔌 Brancher Claude sur toutes mes applis"});
+  $("#ghf").addEventListener("submit",async e=>{e.preventDefault();const v=$("#gh-t").value.trim();if(v)try{localStorage.setItem("qg_gh",v)}catch(x){}const c=$("#cc-t").value.trim();if(c)try{localStorage.setItem("qg_cc",c)}catch(x){}
+    try{const u=await gh("/user");toast("GitHub connecté : "+u.login);openGH()}catch(x){openGH(x.message)}})}
 async function claudeDo(btn){const f=$("#mform");const g=k=>{const e=f.querySelector("#f-"+k);return e?e.value.trim():""};
   const titre=g("titre"),biz=g("biz");if(!titre){toast("Donnez un titre à l'amélioration.");return}
   const repo=depotOf(biz);if(!repo){toast("Indiquez le dépôt GitHub dans la fiche de l'appli (Modifier › Dépôt GitHub).");return}
@@ -858,9 +866,103 @@ let ghLast=0;async function ghRefresh(force){if(!ghTok()||loading())return;if(!f
   for(const a of rows("ameliorations").filter(x=>x.gh&&x.gh.n&&x.gh.state!=="closed")){try{
     const is=await gh(`/repos/${a.gh.repo}/issues/${a.gh.n}`);let note=a.gh.note||"";
     if(is.comments){const cs=await gh(`/repos/${a.gh.repo}/issues/${a.gh.n}/comments?per_page=100`);const mine=cs.filter(c=>/^(✅|⚠️|❓)/.test((c.body||"").trim()));const last=(mine.length?mine:cs)[ (mine.length?mine:cs).length-1];if(last)note=last.body.trim().slice(0,2000)}
-    if(is.state!==a.gh.state||note!==(a.gh.note||"")){const upd={gh:{...a.gh,state:is.state,note}};if(is.state==="closed"&&a.statut!=="livre"){upd.statut=/^⚠️/.test(note)?"test":"livre";if(upd.statut==="livre")upd.livreLe=TODAY;toast("🤖 Claude a terminé : "+a.titre)}await updDoc("ameliorations",a.id,upd)}
+    if(is.state!==a.gh.state||note!==(a.gh.note||"")){const upd={gh:{...a.gh,state:is.state,note}};if(is.state==="closed"&&a.statut!=="livre"){upd.statut=/^⚠️/.test(note)?"test":"livre";if(upd.statut==="livre")upd.livreLe=TODAY;toast(a.gh.newapp?"🎉 "+((S.biz[a.biz]||{}).name||"Ta nouvelle appli")+" est en ligne ! Ouvre-la pour l'installer.":"🤖 Claude a terminé : "+a.titre)}await updDoc("ameliorations",a.id,upd)}
   }catch(e){}}}
 const ghChip=x=>!x.gh?"":x.gh.state==="closed"?`<span class="chip ok">🤖 Fait par Claude</span>`:/^❓/.test(x.gh.note||"")?`<span class="chip warn">🤖 Question de Claude</span>`:`<span class="chip info">🤖 Claude travaille…</span>`;
+/* ---------- Nouvelle appli : de l'idée à l'appli en ligne, sans quitter QG ---------- */
+const ccTok=()=>{try{return localStorage.getItem("qg_cc")||""}catch(e){return ""}};
+const NA0=()=>({step:1,idee:"",parent:"",qs:[],rep:[],nom:"",depot:"",emoji:"✨",couleur:"#E8734A",accroche:"",brief:"",done:{},log:[]});
+let NA=(()=>{try{return JSON.parse(localStorage.getItem("qg_newapp")||"null")}catch(e){return null}})()||NA0();
+const naSave=()=>{try{localStorage.setItem("qg_newapp",JSON.stringify(NA))}catch(e){}};
+const slugify=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/['’]/g,"").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,60);
+const b64=u8=>{let s="";for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s)};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const utf8b64=s=>b64(new TextEncoder().encode(s));
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function loadScript(src){return new Promise((ok,ko)=>{if(window.sealBox)return ok();const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>ko(new Error("Fonction disponible seulement dans l'appli QG installée (pas dans Claude)."));document.head.appendChild(s)})}
+async function ghSecret(repo,name,value){await loadScript("vendor/sealbox.js");const k=await gh(`/repos/${repo}/actions/secrets/public-key`);
+  const enc=b64(window.sealBox(new TextEncoder().encode(value),unb64(k.key)));await gh(`/repos/${repo}/actions/secrets/${name}`,{method:"PUT",body:JSON.stringify({encrypted_value:enc,key_id:k.key_id})})}
+async function ghCommit(repo,branch,files,msg){let ref=null;for(let i=0;i<6&&!ref;i++){try{ref=await gh(`/repos/${repo}/git/ref/heads/${branch}`)}catch(e){if(i===5)throw e;await wait(1500)}}
+  const base=await gh(`/repos/${repo}/git/commits/${ref.object.sha}`);const tree=[];
+  for(const f of files){const bl=await gh(`/repos/${repo}/git/blobs`,{method:"POST",body:JSON.stringify({content:f.b64,encoding:"base64"})});tree.push({path:f.path,mode:"100644",type:"blob",sha:bl.sha})}
+  const t=await gh(`/repos/${repo}/git/trees`,{method:"POST",body:JSON.stringify({base_tree:base.tree.sha,tree})});
+  const c=await gh(`/repos/${repo}/git/commits`,{method:"POST",body:JSON.stringify({message:msg,tree:t.sha,parents:[ref.object.sha]})});
+  await gh(`/repos/${repo}/git/refs/heads/${branch}`,{method:"PATCH",body:JSON.stringify({sha:c.sha})})}
+const shade=(hex,p)=>{const n=parseInt(String(hex).replace("#","").padEnd(6,"0").slice(0,6),16)||0xE8734A;const f=v=>Math.max(0,Math.min(255,Math.round(v+(p>0?(255-v):v)*p/100)));return "#"+[f(n>>16),f(n>>8&255),f(n&255)].map(v=>v.toString(16).padStart(2,"0")).join("")};
+function appIcon(size,emoji,color){const c=document.createElement("canvas");c.width=c.height=size;const x=c.getContext("2d");const g=x.createLinearGradient(0,0,size,size);g.addColorStop(0,shade(color,22));g.addColorStop(1,shade(color,-10));x.fillStyle=g;x.fillRect(0,0,size,size);
+  x.font=`${Math.round(size*.54)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;x.textAlign="center";x.textBaseline="middle";x.fillText(emoji||"✨",size/2,size*.55);return c.toDataURL("image/png")}
+const naJSON=t=>{const m=String(t||"").match(/\{[\s\S]*?\}/);if(!m)throw new Error("Réponse illisible");return JSON.parse(m[0])};
+function openNewApp(){const n=NA;const ai=!!sample;const st=n.step;
+  const prog=n.log.map(l=>`<div class="planline ${l.s==="ok"?"ok":l.s==="err"?"late":"soon"}" style="margin:6px 0">${l.s==="ok"?"✓":l.s==="err"?"⚠️":"…"} ${esc(l.t)}</div>`).join("");
+  const unis=tops().filter(b=>b.id!=="biz-dsg");
+  let body="";
+  if(st===1)body=`<p class="sub">Décris ton idée avec tes mots, comme à Claude. QG prépare le plan, crée l'appli sur ton GitHub, et Claude code la première version puis la met en ligne.</p>
+    <div class="field full"><label for="na-idee">Ton idée</label><textarea id="na-idee" rows="6" placeholder="Ex. Une appli pour suivre mes plantes : quand arroser, photos, rappels…">${esc(n.idee)}</textarea></div>
+    <div class="field full"><label for="na-par">Ranger dans</label><select id="na-par"><option value="">Un projet seul (nouvel onglet)</option>${unis.map(b=>`<option value="${b.id}" ${n.parent===b.id?"selected":""}>${esc(b.name)}</option>`).join("")}</select></div>
+    <div class="mfoot"><button type="button" class="btn ghost" data-act="close">Fermer</button><div class="actions">${ai?`<button type="button" class="btn primary" id="na-go">Continuer ›</button>`:`<button type="button" class="btn primary" id="na-skip">Écrire le plan moi-même ›</button>`}</div></div>`;
+  else if(st===2)body=`<p class="sub">Claude a quelques questions pour bien comprendre. Réponds en quelques mots (ou laisse vide).</p>
+    ${n.qs.map((q,i)=>`<div class="field full"><label for="na-r${i}">${esc(q)}</label><textarea id="na-r${i}" rows="2">${esc(n.rep[i]||"")}</textarea></div>`).join("")}
+    <div class="mfoot"><button type="button" class="btn ghost" id="na-back">‹ Retour</button><div class="actions"><button type="button" class="btn primary" id="na-plan">✦ Préparer le plan</button></div></div>`;
+  else if(st===3)body=`<p class="sub">Voici le plan de la première version. Modifie ce que tu veux, puis lance la création.</p>
+    <div class="fgrid"><div class="field"><label for="na-nom">Nom de l'appli</label><input type="text" id="na-nom" value="${esc(n.nom)}"></div>
+    <div class="field"><label for="na-dep">Nom sur GitHub</label><input type="text" id="na-dep" value="${esc(n.depot)}" placeholder="Ex. Mes-Plantes"></div>
+    <div class="field"><label for="na-emo">Emoji de l'icône</label><input type="text" id="na-emo" value="${esc(n.emoji)}" maxlength="4"></div>
+    <div class="field"><label for="na-col">Couleur</label><input id="na-col" type="color" style="width:100%;height:46px;padding:4px;border:1px solid var(--line,#ddd);border-radius:12px;background:var(--surface,#fff)" value="${esc(n.couleur)}"></div>
+    <div class="field full"><label for="na-acc">En une phrase</label><input type="text" id="na-acc" value="${esc(n.accroche)}"></div>
+    <div class="field full"><label for="na-brief">Cahier des charges (ce que Claude va construire)</label><textarea id="na-brief" rows="12">${esc(n.brief)}</textarea></div></div>
+    <div style="display:flex;align-items:center;gap:12px;margin:8px 0"><img id="na-ico" alt="" style="width:56px;height:56px;border-radius:14px;box-shadow:var(--shadow)"><span class="help">L'icône de ton écran d'accueil. Claude pourra la redessiner plus tard.</span></div>
+    ${!ghTok()||!ccTok()?`<div class="planline late" style="margin:10px 0">Il manque ${!ghTok()?"ton code GitHub":"ton code Claude"} : menu ⋯ › 🤖 Claude modifie mes applis.</div>`:""}
+    <div class="mfoot"><button type="button" class="btn ghost" id="na-back">‹ Retour</button><div class="actions"><button type="button" class="btn primary" id="na-create">🚀 Créer l'appli</button></div></div>`;
+  else body=`<p class="sub">${n.done.issue?`Claude construit <b>${esc(n.nom)}</b> (15 à 30 minutes). Tu peux fermer QG : un point bleu et un message te préviendront quand elle sera en ligne.`:"Création en cours…"}</p>${prog}
+    ${n.done.issue?`<div class="planline" style="margin:12px 0"><b>Pour l'avoir sur ton écran d'accueil</b> une fois prête : ouvre-la dans Safari (bouton « Ouvrir l'appli » sur sa page dans QG), puis Partager › « Sur l'écran d'accueil ».</div>`:""}
+    <div class="mfoot">${n.done.issue?`<button type="button" class="btn ghost" id="na-new">Nouvelle idée</button>`:`<button type="button" class="btn ghost" id="na-back">‹ Modifier</button>`}<div class="actions">${n.done.issue?`<button type="button" class="btn primary" id="na-see">Voir l'appli dans QG</button>`:`<button type="button" class="btn primary" id="na-create">Réessayer</button>`}</div></div>`;
+  $("#layer").innerHTML=`<div class="overlay" data-act="overlay"><form class="modal" id="naf" role="dialog" aria-modal="true" aria-label="Nouvelle appli" style="max-width:640px" onsubmit="return false"><h2>🚀 Nouvelle appli</h2>${body}</form></div>`;
+  const on=(id,fn)=>{const e=$("#"+id);if(e)e.addEventListener("click",fn)};const v=id=>{const e=$("#"+id);return e?e.value.trim():""};
+  const keep=()=>{if(st===1){n.idee=v("na-idee");n.parent=v("na-par")}if(st===2)n.qs.forEach((q,i)=>{n.rep[i]=v("na-r"+i)});if(st===3){n.nom=v("na-nom");n.depot=slugify(v("na-dep"));n.emoji=v("na-emo")||"✨";n.couleur=v("na-col")||"#E8734A";n.accroche=v("na-acc");n.brief=$("#na-brief").value.trim()}naSave()};
+  $("#naf").addEventListener("input",keep);
+  const ico=$("#na-ico");const paintIco=()=>{if(ico)ico.src=appIcon(112,v("na-emo"),v("na-col"))};paintIco();
+  on("na-back",()=>{keep();n.step=Math.max(1,(st===4?3:st-1));if(n.step===2&&!n.qs.length)n.step=1;naSave();openNewApp()});
+  on("na-skip",()=>{keep();if(!n.idee){toast("Décris ton idée.");return}n.step=3;if(!n.brief)n.brief=n.idee;if(!n.nom)n.nom="Nouvelle appli";naSave();openNewApp()});
+  on("na-go",async e=>{keep();if(!n.idee){toast("Décris ton idée.");return}const b=e.target;b.disabled=true;b.textContent="Claude réfléchit…";
+    try{const r=await sample(`Tu aides Tullio, entrepreneur non développeur, à préparer une nouvelle appli mobile (site web installable sur l'écran d'accueil). Son idée :\n"""${n.idee}"""\nPose-lui au maximum 3 questions courtes et concrètes, en français et en le tutoyant, pour bien comprendre ce qu'il veut dans la première version (pour qui, les fonctions indispensables, ce qu'il veut voir en ouvrant l'appli). Réponds UNIQUEMENT avec ce JSON : {"questions":["...","..."]}`,{modelTier:"fast",cache:false});
+      const q=naJSON(r&&r.text).questions;n.qs=(Array.isArray(q)?q:[]).map(String).filter(Boolean).slice(0,3);n.rep=[];n.step=n.qs.length?2:3;naSave();if(n.step===3)return planNow(b);openNewApp()}
+    catch(x){b.disabled=false;b.textContent="Continuer ›";toast("Claude n'a pas pu répondre : "+x.message)}});
+  async function planNow(b){keep();if(b){b.disabled=true;b.textContent="Claude prépare le plan…"}
+    const qa=n.qs.map((q,i)=>`- ${q}\n  → ${n.rep[i]||"(pas de réponse)"}`).join("\n");
+    try{const r=await sample(`Tu prépares la première version d'une appli mobile pour Tullio (site web installable, en français, sans serveur payant : données sur le téléphone).\nSon idée :\n"""${n.idee}"""\nSes réponses :\n${qa||"(aucune)"}\n\nRéponds en DEUX parties, sans rien d'autre :\n1) Une ligne JSON : {"nom":"nom court et joli (20 caractères max)","depot":"nom de dépôt GitHub sans accents ni espaces, mots séparés par des tirets, ex. Mes-Plantes","emoji":"un seul emoji pour l'icône","couleur":"#xxxxxx couleur principale chaude et lumineuse (jamais sombre)","accroche":"une phrase qui dit à quoi sert l'appli"}\n2) La ligne ---PLAN--- puis le cahier des charges en markdown simple : objectif, pour qui, les onglets de la barre du bas, les écrans et fonctionnalités de la première version (liste précise), les données à enregistrer, et « Plus tard » (idées pour les versions suivantes).`,{modelTier:"default",cache:false});
+      const t=String((r&&r.text)||"");const [h,...rest]=t.split("---PLAN---");const j=naJSON(h);
+      n.nom=String(j.nom||"Nouvelle appli").slice(0,30);n.depot=slugify(j.depot||j.nom)||"Nouvelle-appli";n.emoji=String(j.emoji||"✨").slice(0,4);n.couleur=/^#[0-9a-f]{6}$/i.test(j.couleur)?j.couleur:"#E8734A";n.accroche=String(j.accroche||"");n.brief=(rest.join("---PLAN---").trim()||n.idee);n.step=3;naSave();openNewApp()}
+    catch(x){if(b){b.disabled=false;b.textContent="✦ Préparer le plan"}toast("Claude n'a pas pu préparer le plan : "+x.message)}}
+  on("na-plan",e=>planNow(e.target));
+  const emo=$("#na-emo"),col=$("#na-col");[emo,col].forEach(x=>x&&x.addEventListener("input",paintIco));
+  on("na-create",()=>{keep();naCreate()});
+  on("na-new",()=>{NA=NA0();naSave();openNewApp()});
+  on("na-see",()=>{const id=n.bizId;NA=NA0();naSave();closeModal();if(id&&S.biz[id])location.hash=id});}
+async function naCreate(){const n=NA;
+  if(!n.nom||!n.depot||!n.brief){toast("Il manque le nom, le nom GitHub ou le cahier des charges.");return}
+  if(!ghTok()||!ccTok()){openGH("Pour créer une appli, il faut ton code GitHub et ton code Claude (une seule fois).");return}
+  n.step=4;n.log=[];const step=async(k,t,fn)=>{if(n.done[k]){n.log.push({t,s:"ok"});return}const L={t,s:"run"};n.log.push(L);naSave();openNewApp();await fn();n.done[k]=1;L.s="ok";naSave();openNewApp()};
+  try{
+    const me=await gh("/user");const owner=me.login;const repo=owner+"/"+n.depot;n.repo=repo;n.site=`https://${owner.toLowerCase()}.github.io/${n.depot}/`;
+    await step("repo","Création de « "+n.depot+" » sur ton GitHub",async()=>{try{await gh("/user/repos",{method:"POST",body:JSON.stringify({name:n.depot,description:n.accroche.slice(0,300),auto_init:true,has_issues:true,has_wiki:false,has_projects:false,private:false})})}catch(e){if(/already exists|name already/i.test(e.message))throw new Error("Le nom « "+n.depot+" » existe déjà sur ton GitHub : choisis-en un autre.");if(/Resource not accessible|403/.test(e.message))throw new Error("Ton code GitHub n'a pas le droit de créer un dépôt : ajoute « All repositories » et la permission Administration (voir le menu ⋯ › Claude modifie mes applis).");throw e}});
+    await step("pages","Activation de la mise en ligne (GitHub Pages)",async()=>{try{await gh(`/repos/${repo}/pages`,{method:"POST",body:JSON.stringify({build_type:"workflow"})})}catch(e){if(!/409|already/i.test(e.message))throw e}});
+    await step("files","Préparation des fichiers de départ",async()=>{const R=await gh(`/repos/${repo}`);const get=async p=>{const r=await fetch("starter/"+p,{cache:"no-store"});if(!r.ok)throw new Error("Modèle introuvable ("+p+") : utilise l'appli QG installée.");return r.text()};
+      const fill=s=>s.split("{{NOM}}").join(n.nom).split("{{COULEUR}}").join(n.couleur).split("{{ACCROCHE}}").join(n.accroche).split("{{URL}}").join(n.site).split("{{BRIEF}}").join(n.brief);
+      const man=JSON.stringify({name:n.nom,short_name:n.nom.slice(0,12),description:n.accroche,start_url:"./",scope:"./",display:"standalone",orientation:"portrait",background_color:"#FBF6EE",theme_color:n.couleur,lang:"fr",icons:[{src:"icons/icon-192.png",sizes:"192x192",type:"image/png"},{src:"icons/icon-512.png",sizes:"512x512",type:"image/png"},{src:"icons/icon-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}]},null,2);
+      const png=s=>appIcon(s,n.emoji,n.couleur).split(",")[1];
+      const files=[{path:"README.md",b64:utf8b64(fill(await get("README.md")))},{path:".github/workflows/deploy.yml",b64:utf8b64(await get("deploy.yml"))},{path:".github/workflows/claude-qg.yml",b64:utf8b64(await get("claude-qg.yml"))},
+        {path:"site/index.html",b64:utf8b64(fill(await get("index.html")))},{path:"site/sw.js",b64:utf8b64(await get("sw.js"))},{path:"site/manifest.webmanifest",b64:utf8b64(man)},
+        {path:"site/icons/icon-192.png",b64:png(192)},{path:"site/icons/icon-512.png",b64:png(512)},{path:"site/icons/apple-touch-icon.png",b64:png(180)}];
+      await ghCommit(repo,R.default_branch||"main",files,"Départ de l'appli "+n.nom+" (créée depuis QG Business)")});
+    await step("secret","Branchement de Claude sur l'appli",()=>ghSecret(repo,"CLAUDE_CODE_OAUTH_TOKEN",ccTok()));
+    await step("label","Préparation des demandes",async()=>{try{await gh(`/repos/${repo}/labels`,{method:"POST",body:JSON.stringify({name:"claude",color:"D97757",description:"Demande envoyée à Claude depuis QG Business"})})}catch(e){}});
+    await step("biz","Ajout de l'appli dans QG",async()=>{const now=new Date().toISOString();const id=n.bizId||newId("biz");n.bizId=id;const used=bizList().map(b=>b.color);const color=COLORS.find(c=>!used.includes(c))||COLORS[bizList().length%COLORS.length];
+      await setDoc("biz",id,{name:n.nom,parent:n.parent||"",logo:appIcon(128,n.emoji,n.couleur),depot:repo,site:n.site,activite:n.accroche,objectif:"Sortir la première version et la tester",phase:"creation",statut:"actif",color,order:bizList().length,createdAt:now,updatedAt:now});
+      await setDoc("docs",newId("docs"),{biz:id,titre:n.nom+" : cahier des charges",type:"Produit / technique",url:`https://github.com/${repo}#readme`,note:"",createdAt:now,updatedAt:now})});
+    await step("issue","Envoi à Claude : construire la première version",async()=>{await wait(3000);const now=new Date().toISOString();
+      const is=await gh(`/repos/${repo}/issues`,{method:"POST",body:JSON.stringify({title:"Première version de "+n.nom,body:`Construis la première version complète de l'appli « ${n.nom} » dans le dossier site/, en suivant le cahier des charges et les règles du README.\n\n${n.brief}\n\n— Envoyé depuis QG Business (nouvelle appli).`,labels:["claude"]})});
+      await setDoc("ameliorations",newId("ameliorations"),{titre:"Première version de "+n.nom,biz:n.bizId,type:"Fonctionnalité",priorite:"haute",statut:"en_dev",description:n.accroche,spec:n.brief,lien:n.site,gh:{repo,n:is.number,url:is.html_url,at:now,state:"open",note:"",newapp:1},createdAt:now,updatedAt:now})});
+  }catch(e){const L=n.log[n.log.length-1];if(L&&L.s==="run")L.s="err";n.log.push({t:e.message,s:"err"});naSave();openNewApp()}}
 /* ---------- Claude en arrière-plan : questions par univers/projet ou globales ---------- */
 const AJ={jobs:[]};try{AJ.jobs=JSON.parse(localStorage.getItem("qg_claude")||"[]").map(j=>j.status==="run"?{...j,status:"err",err:"Interrompu (appli fermée). Relancez la question."}:j)}catch(e){}
 const ajSave=()=>{try{localStorage.setItem("qg_claude",JSON.stringify(AJ.jobs.slice(0,30)))}catch(e){}};
@@ -1044,7 +1146,7 @@ function vTableau(){
   const hero=!u?`<div class="hero"><div class="hero-t"><div class="eyebrow">${new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"})}</div><h1>${greet}</h1><p class="sub">${al.length?`${al.length} chose${al.length>1?"s":""} à faire avancer aujourd'hui. On s'y met ?`:"Rien d'urgent : c'est le moment de faire grandir un projet."}</p>${sample?`<div class="actions" style="margin-top:14px"><button class="btn primary" data-act="coach" data-k="next">✦ Que faire maintenant ?</button><button class="btn" data-act="coach" data-k="bilan">Bilan de la semaine</button></div>`:""}</div>
       <div class="hero-n"><div><b>${tops().length}</b><span>univers</span></div><div><b>${bizList().filter(b=>!isTop(b)).length+tops().filter(t=>!kids(t.id).length).length}</b><span>projets</span></div><div><b>${ms.filter(m=>m.statut!=="fait").length}</b><span>étapes à venir</span></div></div></div>`
     :`<div class="hero" style="--pc:${bcol(cur)}"><div class="hero-t"><div class="eyebrow">${p?esc(u.name):esc(L(PHASES,u.phase))}</div><h1>${esc(cur.name)}</h1>${cur.activite?`<p class="sub">${esc(cur.activite)}</p>`:""}${cur.objectif?`<p class="goal"><b>Objectif</b> ${esc(cur.objectif)}</p>`:""}</div>
-      <div class="actions">${sample?`<button class="btn primary" data-act="coach" data-k="next">✦ Que faire ?</button>`:""}<button class="btn" data-act="new" data-col="ops">+ Opération</button>${addBtn("jalons","Étape")}<button class="btn ghost" data-act="edit" data-col="biz" data-id="${cur.id}">Modifier</button></div></div>`;
+      <div class="actions">${sample?`<button class="btn primary" data-act="coach" data-k="next">✦ Que faire ?</button>`:""}<button class="btn" data-act="new" data-col="ops">+ Opération</button>${addBtn("jalons","Étape")}${cur.site&&safeUrl(cur.site)?`<a class="btn" href="${esc(safeUrl(cur.site))}" target="_blank" rel="noopener" title="Sur iPhone : ouvrez-la dans Safari, puis Partager › Sur l'écran d'accueil">📲 Ouvrir l'appli</a>`:""}<button class="btn ghost" data-act="edit" data-col="biz" data-id="${cur.id}">Modifier</button></div></div>`;
   return `${offline?`<div class="banner">La base de données n'est pas disponible dans cette vue : vous pouvez tester le logiciel, mais rien ne sera enregistré.</div>`:""}${hero}${focusPanel()}${timePanel()}
   <div class="kpis">
     <div class="kpi"><span class="lab">Résultat ${y}</span><span class="val ${T.res>=0?"pos":"neg"}">${eur(T.res)}</span><span class="hint">${eur(T.in)} de recettes · ${eur(T.out)} de dépenses</span></div>
@@ -1328,6 +1430,7 @@ function openSheet(){
   <button class="opt" data-act="new" data-col="biz" style="color:var(--accent)">＋ Nouvel univers ou business</button>
   ${window.QG&&window.QG.sync?(()=>{const st=window.QG.sync.status();return `<button class="opt" data-act="sync">🔄 Synchronisation téléphone ↔ ordinateur<small>${st.connected?(st.error?"⚠ "+esc(st.error):"activée"):"à activer"}</small></button>`})():""}
   ${window.QG&&window.QG.push?`<button class="opt" data-act="notifs">🔔 Notifications<small>${window.QG.push.on()?"activées":"à activer"}</small></button>`:""}
+  <button class="opt" data-act="newapp">🚀 Nouvelle appli<small>De l'idée à l'appli en ligne</small></button>
   <button class="opt" data-act="sig">✉️ Signature de mail<small>Officina Disegni</small></button>
   <button class="opt" data-act="gh">🤖 Claude modifie mes applis<small>${ghTok()?"activé":"à activer"}</small></button>
   <button class="opt" data-act="review">✦ Revue de la semaine<small>3 priorités</small></button>
@@ -1457,6 +1560,7 @@ document.addEventListener("click",async e=>{const el=e.target.closest("[data-act
     case "claude-do":claudeDo(el);break;
     case "gh":openGH();break;
     case "sig":openSig();break;
+    case "newapp":openNewApp();break;
     case "optype":UI.opType=el.dataset.k;render();break;
     case "cttype":UI.ctType=el.dataset.k;render();break;
     case "ctstep":UI.ctStep=UI.ctStep===el.dataset.k?"":el.dataset.k;render();break;

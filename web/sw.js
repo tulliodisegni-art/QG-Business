@@ -1,5 +1,5 @@
 /* QG Business : fonctionne hors ligne. Le site est servi d'abord depuis le réseau, puis depuis le cache. */
-const CACHE="qgbusiness-v13";
+const CACHE="qgbusiness-v14";
 const SHELL=["./","index.html","shim.js","manifest.webmanifest","seed.json","icons/icon-192.png","icons/icon-512.png","icons/apple-touch-icon.png","icons/icon-maskable-512.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});

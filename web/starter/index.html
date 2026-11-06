@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{NOM}}</title>
+<meta name="theme-color" content="{{COULEUR}}">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="{{NOM}}">
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#FBF6EE;color:#2B2420;font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-align:center;padding:24px;box-sizing:border-box}
+.c{max-width:420px}.i{width:96px;height:96px;border-radius:24px;box-shadow:0 10px 30px rgba(0,0,0,.12)}h1{margin:18px 0 6px;font-size:26px}p{color:#6B5F57;margin:0}
+</style>
+</head>
+<body>
+<div class="c"><img class="i" src="icons/icon-192.png" alt=""><h1>{{NOM}}</h1><p>Claude prépare la première version. Elle apparaîtra ici d'ici quelques minutes.</p></div>
+<!-- page d'attente QG Business -->
+<script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{})</script>
+</body>
+</html>
